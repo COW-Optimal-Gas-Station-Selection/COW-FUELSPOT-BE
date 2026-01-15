@@ -66,5 +66,6 @@ class GasStationRepositoryTest {
         // 3. Then: 검증
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getName()).isEqualTo("강남주유소"); // 1.2km인 강남이 먼저 나와야 함
+
     }
 }
