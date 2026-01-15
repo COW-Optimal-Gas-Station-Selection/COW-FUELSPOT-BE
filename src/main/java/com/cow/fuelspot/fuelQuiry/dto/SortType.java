@@ -3,6 +3,7 @@ package com.cow.fuelspot.fuelQuiry.dto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
+import java.util.Objects;
 
 @Getter
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public enum SortType {
     // 숫자로 된 코드가 들어왔을 때 Enum으로 변환해주는 메서드
     public static SortType fromCode(Integer code) {
         return Arrays.stream(SortType.values())
-                .filter(v -> v.code == code)
+                .filter(v -> Objects.equals(v.code, code))
                 .findFirst()
                 .orElse(DISTANCE); // 기본값: 거리순
     }
