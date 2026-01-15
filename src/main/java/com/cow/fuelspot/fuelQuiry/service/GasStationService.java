@@ -46,5 +46,6 @@ public class GasStationService {
                 .isSelf(entity.getIsSelf())
                 .isCarWash(entity.getIsCarWash())
                 .build();
+
     }
 }
