@@ -1,10 +1,14 @@
 package com.cow.fuelspot.fuelQuiry.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 public class GasStationRequest {
     private Double lat;          // 위도
     private Double lon;          // 경도

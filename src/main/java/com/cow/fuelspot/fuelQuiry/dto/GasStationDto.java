@@ -1,32 +1,19 @@
 package com.cow.fuelspot.fuelQuiry.dto;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor // 파라미터 없는 생성자
+@AllArgsConstructor // 모든 필드를 인자로 받는 생성자 (QueryDSL용)
+@Builder
 public class GasStationDto {
 
-    private Long stationId;
+    private String stationId; // 반드시 String이어야 함 (엔티티와 일치)
     private String name;
     private String brand;
     private Integer price;
     private Double distance;
     private Double lat;
     private Double lon;
-
-    @Builder
-    public GasStationDto(Long stationId, String name, String brand, Integer price,
-                         Double distance, Double lat, Double lon) {
-        this.stationId = stationId;
-        this.name = name;
-        this.brand = brand;
-        this.price = price;
-        this.distance = distance;
-        this.lat = lat;
-        this.lon = lon;
-    }
-
 }
