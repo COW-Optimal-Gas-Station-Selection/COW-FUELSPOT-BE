@@ -21,7 +21,7 @@ public class OpinetApiClient {
 
         URI uri = UriComponentsBuilder.fromUriString(BASE_URL)
                 .queryParam("code", apiKey)
-                .queryParam("out", "xml")      // ★ 핵심: XML 요청
+                .queryParam("out", "xml")
                 .queryParam("x", x)
                 .queryParam("y", y)
                 .queryParam("radius", radius)

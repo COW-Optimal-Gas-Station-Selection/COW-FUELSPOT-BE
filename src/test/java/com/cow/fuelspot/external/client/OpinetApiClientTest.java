@@ -19,7 +19,6 @@ class OpinetApiClientTest {
     @Test
     @DisplayName("오피넷 API 연동 테스트 - 서울역 주변 휘발유 주유소 조회")
     void fetchAroundStationsTest() {
-        // given: 테스트 데이터 준비 (서울역 좌표)
         double x = 309907.0;
         double y = 550882.0;
         int radius = 3000;
