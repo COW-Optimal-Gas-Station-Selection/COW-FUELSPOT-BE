@@ -22,7 +22,7 @@ public class OpinetAroundResponseDTO {
         @JacksonXmlProperty(localName = "UNI_ID")
         private String uniId;
 
-        @JacksonXmlProperty(localName = "POLL_DIV_CD")
+        @JacksonXmlProperty(localName = "POLL_DIV_CO")
         private String pollDivCd;
 
         @JacksonXmlProperty(localName = "OS_NM")
