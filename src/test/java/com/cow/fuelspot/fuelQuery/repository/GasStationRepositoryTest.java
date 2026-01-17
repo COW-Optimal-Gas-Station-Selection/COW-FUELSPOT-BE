@@ -1,10 +1,10 @@
-package com.cow.fuelspot.fuelQuiry.repository;
+package com.cow.fuelspot.fuelQuery.repository;
 
 import com.cow.fuelspot.config.QuerydslConfig;
-import com.cow.fuelspot.fuelQuiry.dto.FuelType;
-import com.cow.fuelspot.fuelQuiry.dto.GasStationDto;
-import com.cow.fuelspot.fuelQuiry.dto.GasStationRequest;
-import com.cow.fuelspot.fuelQuiry.entity.GasStation;
+import com.cow.fuelspot.fuelQuery.dto.FuelType;
+import com.cow.fuelspot.fuelQuery.dto.GasStationDto;
+import com.cow.fuelspot.fuelQuery.dto.GasStationRequest;
+import com.cow.fuelspot.fuelQuery.entity.GasStation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

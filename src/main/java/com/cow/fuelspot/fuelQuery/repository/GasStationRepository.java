@@ -1,5 +1,5 @@
-package com.cow.fuelspot.fuelQuiry.repository;
-import com.cow.fuelspot.fuelQuiry.entity.GasStation;
+package com.cow.fuelspot.fuelQuery.repository;
+import com.cow.fuelspot.fuelQuery.entity.GasStation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.cow.fuelspot.fuelQuiry.dto;
+package com.cow.fuelspot.fuelQuery.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

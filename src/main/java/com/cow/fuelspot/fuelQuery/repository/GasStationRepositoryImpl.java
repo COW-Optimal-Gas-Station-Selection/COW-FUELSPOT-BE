@@ -1,8 +1,8 @@
-package com.cow.fuelspot.fuelQuiry.repository;
+package com.cow.fuelspot.fuelQuery.repository;
 
-import com.cow.fuelspot.fuelQuiry.dto.FuelType;
-import com.cow.fuelspot.fuelQuiry.dto.GasStationDto;
-import com.cow.fuelspot.fuelQuiry.dto.GasStationRequest;
+import com.cow.fuelspot.fuelQuery.dto.FuelType;
+import com.cow.fuelspot.fuelQuery.dto.GasStationDto;
+import com.cow.fuelspot.fuelQuery.dto.GasStationRequest;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -12,7 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-import static com.cow.fuelspot.fuelQuiry.entity.QGasStation.gasStation;
+import static com.cow.fuelspot.fuelQuery.entity.QGasStation.gasStation;
 
 @RequiredArgsConstructor
 public class GasStationRepositoryImpl implements GasStationRepositoryCustom {

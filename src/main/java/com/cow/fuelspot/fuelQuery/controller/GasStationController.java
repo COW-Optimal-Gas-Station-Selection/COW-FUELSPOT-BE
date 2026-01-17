@@ -1,10 +1,10 @@
-package com.cow.fuelspot.fuelQuiry.controller;
+package com.cow.fuelspot.fuelQuery.controller;
 
 
-import com.cow.fuelspot.fuelQuiry.dto.GasStationDto;
-import com.cow.fuelspot.fuelQuiry.dto.GasStationRequest;
-import com.cow.fuelspot.fuelQuiry.dto.StationDetailResponse;
-import com.cow.fuelspot.fuelQuiry.service.GasStationService;
+import com.cow.fuelspot.fuelQuery.dto.GasStationDto;
+import com.cow.fuelspot.fuelQuery.dto.GasStationRequest;
+import com.cow.fuelspot.fuelQuery.dto.StationDetailResponse;
+import com.cow.fuelspot.fuelQuery.service.GasStationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
