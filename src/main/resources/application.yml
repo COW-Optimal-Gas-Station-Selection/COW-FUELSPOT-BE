@@ -11,4 +11,4 @@ spring:
 
 opinet:
   api:
-    key: "F260108032"
+    key: ${OPINET_API_KEY}
