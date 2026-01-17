@@ -9,5 +9,4 @@ public class CowFuelspotBeApplication {
     public static void main(String[] args) {
         SpringApplication.run(CowFuelspotBeApplication.class, args);
     }
-
 }
