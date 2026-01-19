@@ -1,8 +1,8 @@
-package com.cow.fuelspot.fuelQuery.repository;
+package com.cow.fuelspot.domain.station.repository;
 
-import com.cow.fuelspot.fuelQuery.dto.FuelType;
-import com.cow.fuelspot.fuelQuery.dto.GasStationDto;
-import com.cow.fuelspot.fuelQuery.dto.GasStationRequest;
+import com.cow.fuelspot.domain.station.dto.FuelType;
+import com.cow.fuelspot.domain.station.dto.GasStationDto;
+import com.cow.fuelspot.domain.station.dto.GasStationRequest;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberPath;

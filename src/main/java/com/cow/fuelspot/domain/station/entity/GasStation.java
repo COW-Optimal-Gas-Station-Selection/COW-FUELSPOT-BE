@@ -1,4 +1,4 @@
-package com.cow.fuelspot.fuelQuery.entity;
+package com.cow.fuelspot.domain.station.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
