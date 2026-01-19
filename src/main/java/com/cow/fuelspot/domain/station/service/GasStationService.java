@@ -1,10 +1,10 @@
-package com.cow.fuelspot.fuelQuery.service;
+package com.cow.fuelspot.domain.station.service;
 
-import com.cow.fuelspot.fuelQuery.dto.GasStationDto;
-import com.cow.fuelspot.fuelQuery.dto.GasStationRequest;
-import com.cow.fuelspot.fuelQuery.dto.StationDetailResponse;
-import com.cow.fuelspot.fuelQuery.entity.GasStation;
-import com.cow.fuelspot.fuelQuery.repository.GasStationRepository;
+import com.cow.fuelspot.domain.station.dto.GasStationDto;
+import com.cow.fuelspot.domain.station.dto.GasStationRequest;
+import com.cow.fuelspot.domain.station.dto.StationDetailResponse;
+import com.cow.fuelspot.domain.station.entity.GasStation;
+import com.cow.fuelspot.domain.station.repository.GasStationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.cow.fuelspot.config;
+package com.cow.fuelspot.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
