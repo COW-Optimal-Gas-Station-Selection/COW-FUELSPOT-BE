@@ -1,12 +1,10 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
+import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OilPriceDto;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -19,27 +17,35 @@ public class DetailResponse {
     private String lat;
     private String lon;
     private boolean isCarWash;
-    private List<PriceInfo> prices;
+    private Integer priceGasoline;
+    private Integer priceDiesel;
+    private Integer priceLpg;
+    private String tradeDate;
+    private String tradeTime;
 
-    @Getter
-    @Builder
-    public static class PriceInfo {
-        private String type;
-        private Integer price;
-        private String tradeDate;
-    }
 
     public static DetailResponse from(OpinetDetailDto dto) {
-        List<PriceInfo> priceList = null;
+        Integer gasoline = null;
+        Integer diesel = null;
+        Integer lpg = null;
+        String tradeDate = null;
+        String tradeTime = null;
 
         if (dto.getOilPrices() != null) {
-            priceList = dto.getOilPrices().stream()
-                    .map(p -> PriceInfo.builder()
-                            .type(p.getType())
-                            .price(p.getPrice())
-                            .tradeDate(p.getTradeDate())
-                            .build())
-                    .collect(Collectors.toList());
+            for (OilPriceDto priceDto : dto.getOilPrices()) {
+                FuelType type = priceDto.getType();
+                if (type == null) continue;
+                switch (type) {
+                    case GASOLINE -> gasoline = priceDto.getPrice();
+                    case DIESEL -> diesel = priceDto.getPrice();
+                    case LPG -> lpg = priceDto.getPrice();
+                }
+                //TODO 판단 기준
+                tradeDate=priceDto.getTradeDate();
+                tradeTime=priceDto.getTradeTime();
+
+
+            }
         }
 
         return DetailResponse.builder()
@@ -51,7 +57,11 @@ public class DetailResponse {
                 .lat(dto.getLat())
                 .lon(dto.getLon())
                 .isCarWash("Y".equals(dto.getCarWashYn()))
-                .prices(priceList)
+                .priceGasoline(gasoline)
+                .priceDiesel(diesel)
+                .priceLpg(lpg)
+                .tradeDate(tradeDate)
+                .tradeTime(tradeTime)
                 .build();
     }
 }

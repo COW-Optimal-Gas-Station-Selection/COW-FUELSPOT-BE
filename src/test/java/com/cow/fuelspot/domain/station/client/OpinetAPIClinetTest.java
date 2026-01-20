@@ -28,8 +28,8 @@ class OpinetAPIClinetTest {
     void printNearbyGasStations() throws Exception {
         // 1. Given: 요청 파라미터 (좌표는 KATECH 좌표계인지 확인 필요, 일단 예시값)
         NearbyRequest request = NearbyRequest.builder()
-                .lat("314681.8") // 오피넷은 보통 KATECH(TM) 좌표를 사용합니다.
-                .lon("544837")
+                .lat(Double.valueOf("314681")) // 오피넷은 보통 KATECH(TM) 좌표를 사용합니다.
+                .lon(Double.valueOf("544837"))
                 .radius(3000)
                 .fuelType(FuelType.GASOLINE)
                 .build();
