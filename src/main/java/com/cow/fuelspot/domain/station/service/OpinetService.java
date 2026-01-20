@@ -9,7 +9,6 @@ import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,10 @@ public class OpinetService {
 
         for (FuelType type : FuelType.values()) {
             OpinetNearbyDto[] dtos = gasStationApiClient.getNearbyGasStations(request, type);
-            mergeByFuelType(mergeMap, dtos, type);
+
+            if (dtos != null) {
+                mergeByFuelType(mergeMap, dtos, type);
+            }
         }
 
         return mergeMap.values().stream()
@@ -54,7 +56,9 @@ public class OpinetService {
         }
     }
 
-    private void fillPrice(NearbyResponse.NearbyResponseBuilder builder, FuelType type, int price) {
+    private void fillPrice(NearbyResponse.NearbyResponseBuilder builder, FuelType type, Integer price) {
+        if (price == null || price == 0) return;
+
         switch (type) {
             case GASOLINE -> builder.priceGasoline(price);
             case DIESEL -> builder.priceDiesel(price);
