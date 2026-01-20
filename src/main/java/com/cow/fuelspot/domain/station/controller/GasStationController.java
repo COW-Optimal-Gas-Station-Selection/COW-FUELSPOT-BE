@@ -1,10 +1,11 @@
 package com.cow.fuelspot.domain.station.controller;
 
-
-import com.cow.fuelspot.domain.station.dto.GasStationDto;
-import com.cow.fuelspot.domain.station.dto.GasStationRequest;
-import com.cow.fuelspot.domain.station.dto.StationDetailResponse;
-import com.cow.fuelspot.domain.station.service.GasStationService;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
+//import com.cow.fuelspot.domain.station.dto.request.FilterGasStationRequest;
+import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
+import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
+import com.cow.fuelspot.domain.station.service.OpinetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,27 +18,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GasStationController {
 
-    private final GasStationService gasStationService;
-    /**
-     * [내 주변 주유소 조회] 및 [주유소 필터 조회]
-     * URL: /api/gas-stations/nearby
-     * Method: GET
-     */
+    private final OpinetService opinetService;
+
     @GetMapping("/nearby")
-    public ResponseEntity<List<GasStationDto>> getNearbyStations(@Valid GasStationRequest request) {
-        List<GasStationDto> stations = gasStationService.getNearbyStations(request);
+    public ResponseEntity<List<OpinetNearbyDto>> getNearbyStations(@Valid NearbyRequest request) {
+        List<OpinetNearbyDto> stations = opinetService.getNearbyGasStations(request);
         return ResponseEntity.ok(stations);
     }
 
-    /**
-     * [주유소 상세 정보 조회]
-     * URL: /api/gas-stations/{stationId}
-     * Method: GET
-     */
     @GetMapping("/{stationId}")
-    public ResponseEntity<StationDetailResponse> getStationDetail(@PathVariable String stationId) {
-        StationDetailResponse detail = gasStationService.getStationDetail(stationId);
+    public ResponseEntity<DetailResponse> getStationDetail(@PathVariable String stationId) {
+        OpinetDetailDto dto = opinetService.getDetailGasStation(stationId);
+        DetailResponse detail = DetailResponse.from(dto);
         return ResponseEntity.ok(detail);
     }
-
 }
