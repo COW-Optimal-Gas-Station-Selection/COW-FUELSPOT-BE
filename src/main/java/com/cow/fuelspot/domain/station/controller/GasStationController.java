@@ -1,11 +1,10 @@
 package com.cow.fuelspot.domain.station.controller;
 
-import com.cow.fuelspot.domain.station.dto.opinet.GasStationDto;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 //import com.cow.fuelspot.domain.station.dto.request.FilterGasStationRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
-import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import com.cow.fuelspot.domain.station.service.OpinetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,8 @@ public class GasStationController {
     private final OpinetService opinetService;
 
     @GetMapping("/nearby")
-    public ResponseEntity<List<GasStationDto>> getNearbyStations(@Valid NearbyRequest request) {
-        List<GasStationDto> stations = opinetService.getNearbyGasStations(request);
+    public ResponseEntity<List<OpinetNearbyDto>> getNearbyStations(@Valid NearbyRequest request) {
+        List<OpinetNearbyDto> stations = opinetService.getNearbyGasStations(request);
         return ResponseEntity.ok(stations);
     }
 

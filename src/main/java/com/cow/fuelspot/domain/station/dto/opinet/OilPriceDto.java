@@ -1,25 +1,31 @@
 package com.cow.fuelspot.domain.station.dto.opinet;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OilPriceDto {
-    @JsonProperty("PRODCD")
-    private String type;      // B027, D047 등 코드
 
-    @JsonProperty("PRICE")
-    private Integer price;    // 가격
+    @JsonProperty("fuelType")
+    @JsonAlias("PRODCD")
+    private String type;
 
-    @JsonProperty("TRADE_DT")
+    @JsonProperty("price")
+    @JsonAlias("PRICE")
+    private Integer price;
+
+    @JsonProperty("tradeDate")
+    @JsonAlias("TRADE_DT")
     private String tradeDate; // 거래일자
 
-    @JsonProperty("TRADE_TM")
+    @JsonProperty("tradeTime")
+    @JsonAlias("TRADE_TM")
     private String tradeTime; // 거래시간
 }

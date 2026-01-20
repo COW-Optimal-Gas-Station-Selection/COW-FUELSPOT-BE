@@ -1,7 +1,6 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
-import com.cow.fuelspot.domain.station.dto.opinet.GasStationDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,18 +13,18 @@ public class NearbyResponse {
     private Integer price;
     private Integer distance;
     private String lat;
-    private String len;
+    private String lon;
 
 
-    public static NearbyResponse from(GasStationDto dto){
+    public static NearbyResponse from(OpinetNearbyDto dto){
         return NearbyResponse.builder()
                 .id(dto.getId())
-                .name(dto.getName())      // 수정: name ← getName()
-                .brand(dto.getBrand())    // 수정: brand ← getBrand()
+                .name(dto.getName())
+                .brand(dto.getBrand())
                 .price(dto.getPrice())
                 .distance(dto.getDistance())
                 .lat(dto.getLat())
-                .len(dto.getLen())
+                .lon(dto.getLon())
                 .build();
     }
 }

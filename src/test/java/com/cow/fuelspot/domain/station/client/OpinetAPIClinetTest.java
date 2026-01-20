@@ -1,7 +1,7 @@
 package com.cow.fuelspot.domain.station.client;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
-import com.cow.fuelspot.domain.station.dto.opinet.GasStationDto;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,7 @@ class OpinetAPIClinetTest {
 
         // 2. When: 실제 API 호출
         System.out.println(">>> 호출 URL 확인을 위한 로그 출력 필요 (GasStationApiClient 내부)");
-        GasStationDto[] result = gasStationApiClient.getNearbyGasStations(request);
+        OpinetNearbyDto[] result = gasStationApiClient.getNearbyGasStations(request);
 
         // 3. Then: 결과 출력
         printJson("주변 주유소 목록", result);

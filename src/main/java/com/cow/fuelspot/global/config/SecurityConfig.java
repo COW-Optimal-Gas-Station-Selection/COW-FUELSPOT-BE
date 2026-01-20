@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // "/api/members" 로 오는 요청(회원가입)은 무조건 허용(permitAll)
                         .requestMatchers("/api/members").permitAll()
-
+                        .requestMatchers("/api/gas-stations/**").permitAll()
                         // 그 외의 모든 요청은 인증된(로그인한) 사람만 통과
                         .anyRequest().authenticated()
                 );
