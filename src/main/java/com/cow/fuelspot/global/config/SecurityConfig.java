@@ -24,6 +24,9 @@ public class SecurityConfig {
 
                 // 출입 권한 설정 (어떤 주소로 들어올 때 검사를 할지 말지 정하는 곳)
                 .authorizeHttpRequests(auth -> auth
+                        // 스웨거 관련 주소 2개를 "프리패스"로 설정!
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
                         // "/api/members" 로 오는 요청(회원가입)은 무조건 허용(permitAll)
                         .requestMatchers("/api/members").permitAll()
                         .requestMatchers("/api/gas-stations/**").permitAll()
