@@ -45,7 +45,6 @@ jobs:
             docker rmi ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest || true
             docker pull ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
             
-            # --network host: 서버의 DB(localhost)에 바로 붙기 위한 치트키
             docker run -d \
               --name fuelspot-app \
               --network host \
