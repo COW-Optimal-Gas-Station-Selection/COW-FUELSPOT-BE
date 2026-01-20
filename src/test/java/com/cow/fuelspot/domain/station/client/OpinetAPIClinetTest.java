@@ -28,34 +28,33 @@ class OpinetAPIClinetTest {
     void printNearbyGasStations() throws Exception {
         // 1. Given: 요청 파라미터 (좌표는 KATECH 좌표계인지 확인 필요, 일단 예시값)
         NearbyRequest request = NearbyRequest.builder()
-                .lat(Double.valueOf("314681")) // 오피넷은 보통 KATECH(TM) 좌표를 사용합니다.
-                .lon(Double.valueOf("544837"))
-                .radius(3000)
-                .fuelType(FuelType.GASOLINE)
+                .lat(Double.valueOf("314681.8")) // 오피넷은 보통 KATECH(TM) 좌표를 사용합니다.
+                .lon(Double.valueOf("544837.0"))
+                .radius(5000)
                 .build();
 
         // 2. When: 실제 API 호출
         System.out.println(">>> 호출 URL 확인을 위한 로그 출력 필요 (GasStationApiClient 내부)");
-        OpinetNearbyDto[] result = gasStationApiClient.getNearbyGasStations(request);
+        OpinetNearbyDto[] result = gasStationApiClient.getNearbyGasStations(request, FuelType.GASOLINE);
 
         // 3. Then: 결과 출력
         printJson("주변 주유소 목록", result);
         assertThat(result).isNotNull();
     }
 
-    @Test
-    @DisplayName("주유소 상세 정보 실제 호출 및 콘솔 출력")
-    void printDetailGasStation() throws Exception {
-        // 1. Given: 실제 주유소 ID
-        String stationId = "A0011826";
-
-        // 2. When: 실제 API 호출
-        OpinetDetailDto detail = gasStationApiClient.getDetailGasStation(stationId);
-
-        // 3. Then: 결과 출력
-        printJson("주유소 상세 정보", detail);
-        assertThat(detail).isNotNull();
-    }
+//    @Test
+//    @DisplayName("주유소 상세 정보 실제 호출 및 콘솔 출력")
+//    void printDetailGasStation() throws Exception {
+//        // 1. Given: 실제 주유소 ID
+//        String stationId = "A0011826";
+//
+//        // 2. When: 실제 API 호출
+//        OpinetDetailDto detail = gasStationApiClient.getDetailGasStation(stationId);
+//
+//        // 3. Then: 결과 출력
+//        printJson("주유소 상세 정보", detail);
+//        assertThat(detail).isNotNull();
+//    }
 
     // JSON 출력을 위한 헬퍼 메소드
     private void printJson(String title, Object obj) throws Exception {

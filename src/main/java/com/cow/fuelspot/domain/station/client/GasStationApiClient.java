@@ -1,5 +1,6 @@
 package com.cow.fuelspot.domain.station.client;
 
+import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
@@ -27,8 +28,10 @@ public class GasStationApiClient {
         this.objectMapper = objectMapper;
     }
 
-    public OpinetNearbyDto[] getNearbyGasStations(NearbyRequest request) {
-        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, request.getFuelType());
+    public OpinetNearbyDto[] getNearbyGasStations(NearbyRequest request, FuelType type) {
+    //이놈 형태 수정 예정
+        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
+        System.out.println(url);
         OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
 
         if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {

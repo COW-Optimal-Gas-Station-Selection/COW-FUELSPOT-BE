@@ -2,13 +2,11 @@ package com.cow.fuelspot.domain.station.dto.request;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @Getter
+@Setter // 추가: 쿼리 파라미터 바인딩을 위해 반드시 필요합니다.
 @NoArgsConstructor
 @AllArgsConstructor
 public class NearbyRequest {
@@ -21,9 +19,6 @@ public class NearbyRequest {
     @NotNull
     private Integer radius;
 
-    @NotNull
-    private FuelType fuelType;
-
     public String getLatString() {
         return formatDouble(this.lat);
     }
@@ -31,9 +26,9 @@ public class NearbyRequest {
     public String getLonString() {
         return formatDouble(this.lon);
     }
+
     private String formatDouble(Double value) {
         if (value == null) return null;
-        // 2000.0 -> "2000"으로 변환 (소수점 이하가 0이면 제거)
         if (value == value.longValue()) {
             return String.format("%d", value.longValue());
         }
