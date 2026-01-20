@@ -1,4 +1,4 @@
-package com.cow.fuelspot.domain.station.dto;
+package com.cow.fuelspot.domain.station.dto.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
