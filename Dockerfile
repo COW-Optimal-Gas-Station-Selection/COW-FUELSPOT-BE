@@ -1,5 +1,5 @@
 # -------------- Build Stage (빌드 단계)--------------
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 WORKDIR /app
 
 COPY gradlew .
@@ -12,7 +12,7 @@ COPY src src
 RUN ./gradlew clean bootJar -x test
 
 # -------------- Run Stage (실행 단계)--------------
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 ENV TZ=Asia/Seoul
