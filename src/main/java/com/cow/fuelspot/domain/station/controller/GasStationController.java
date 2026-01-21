@@ -18,15 +18,14 @@ import java.util.List;
 @RequestMapping("/api/gas-stations")
 @RequiredArgsConstructor
 public class GasStationController {
-
     private final OpinetService opinetService;
-
+    //근처 주유소 조회
     @GetMapping("/nearby")
     public ResponseEntity<List<NearbyResponse>> getNearbyStations(@Valid NearbyRequest request) {
         List<NearbyResponse> stations = opinetService.getNearbyGasStations(request);
         return ResponseEntity.ok(stations);
     }
-
+    //주유소 상세 정보 조회
     @GetMapping("/{stationId}")
     public ResponseEntity<DetailResponse> getStationDetail(@PathVariable String stationId) {
         OpinetDetailDto dto = opinetService.getDetailGasStation(stationId);

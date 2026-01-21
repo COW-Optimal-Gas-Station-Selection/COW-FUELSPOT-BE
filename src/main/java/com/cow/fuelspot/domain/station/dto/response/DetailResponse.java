@@ -44,7 +44,6 @@ public class DetailResponse {
                 tradeDate=priceDto.getTradeDate();
                 tradeTime=priceDto.getTradeTime();
 
-
             }
         }
 
