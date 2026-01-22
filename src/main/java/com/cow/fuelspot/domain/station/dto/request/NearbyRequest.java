@@ -6,7 +6,7 @@ import lombok.*;
 
 @Builder
 @Getter
-@Setter // 추가: 쿼리 파라미터 바인딩을 위해 반드시 필요합니다.
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class NearbyRequest {

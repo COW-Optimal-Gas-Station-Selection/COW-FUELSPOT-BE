@@ -1,8 +1,7 @@
 package com.cow.fuelspot.domain.station.controller;
 
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
-//import com.cow.fuelspot.domain.station.dto.request.FilterGasStationRequest;
+import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
@@ -31,5 +30,11 @@ public class GasStationController {
         OpinetDetailDto dto = opinetService.getDetailGasStation(stationId);
         DetailResponse detail = DetailResponse.from(dto);
         return ResponseEntity.ok(detail);
+    }
+    //필터 조회
+    @GetMapping("/filter")
+    public ResponseEntity<List<NearbyResponse>> getStationDetail(@Valid FilterRequest request) {
+        List<NearbyResponse> stations = opinetService.getFilteredStations(request);
+        return ResponseEntity.ok(stations);
     }
 }

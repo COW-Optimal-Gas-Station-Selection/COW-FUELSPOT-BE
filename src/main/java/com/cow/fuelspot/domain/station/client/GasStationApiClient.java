@@ -3,6 +3,7 @@ package com.cow.fuelspot.domain.station.client;
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
+import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,6 +36,15 @@ public class GasStationApiClient {
     public OpinetNearbyDto[] getNearbyGasStations(NearbyRequest request, FuelType type) {
         //이놈 형태 수정 예정
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
+        OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
+        if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {
+            return new OpinetNearbyDto[0];
+        }
+        return response.getRESULT().getOIL().toArray(new OpinetNearbyDto[0]);
+    }
+    public OpinetNearbyDto[] getStation(FilterRequest request) {
+        //이놈 형태 수정 예정
+        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, request.getFuelType().getCode());
         OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
         if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {
             return new OpinetNearbyDto[0];
