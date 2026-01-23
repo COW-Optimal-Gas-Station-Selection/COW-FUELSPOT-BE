@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class OpinetService {
 
     private final GasStationApiClient gasStationApiClient;
-
+    //근처 조회
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request) {
         Map<String, NearbyResponse.NearbyResponseBuilder> mergeMap = new LinkedHashMap<>();
         for (FuelType type : FuelType.values()) {
@@ -35,11 +35,11 @@ public class OpinetService {
                 .map(NearbyResponse.NearbyResponseBuilder::build)
                 .collect(Collectors.toList());
     }
-
+    //세부사항 조회
     public OpinetDetailDto getDetailGasStation(String id) {
         return gasStationApiClient.getDetailGasStation(id);
     }
-
+    //필터 조회
     public List<NearbyResponse> getFilteredStations(FilterRequest request) {
         OpinetNearbyDto[] nearbyDtos = gasStationApiClient.getStation(request);
 
