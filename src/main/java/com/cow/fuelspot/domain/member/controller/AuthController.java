@@ -32,4 +32,12 @@ public class AuthController {
         // 200 OK 상태 코드와 응답 반환
         return ResponseEntity.ok(response);
     }
+
+    // 로그아웃 API
+    // POST /api/auth/logout
+    // 프론트엔드에서 토큰 삭제
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+    }
 }

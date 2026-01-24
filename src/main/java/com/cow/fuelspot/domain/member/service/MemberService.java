@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cow.fuelspot.domain.member.dto.LoginRequest;
 import com.cow.fuelspot.domain.member.dto.LoginResponse;
 import com.cow.fuelspot.global.jwt.JwtTokenProvider;
+import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
+import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
 
 // 회원 서비스 계층
 // 회원의 비즈니스 로직 처리 (회원가입, 로그인)
@@ -23,7 +25,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 도구
     private final JwtTokenProvider jwtTokenProvider; // JWT 토큰 생성 도구
 
-    // 회원가입 기능
+    // 회원가입
     // 이메일 중복 체크, 비밀번호 암호화, DB 저장
     @Transactional
     public void signup(MemberSignupRequest request) {
@@ -42,7 +44,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // 로그인 기능
+    // 로그인
     // 이메일 존재 여부 확인, 비밀번호 일치 여부 확인, 인증 성공 시 JWT 토큰 발급 및 사용자 정보 반환
     public LoginResponse login(LoginRequest request) {
         // 이메일로 회원 조회
@@ -69,6 +71,42 @@ public class MemberService {
                 .fuelType(member.getFuelType()) // 선호 유종
                 .radius(member.getRadius()) // 선호 반경
                 .build();
+    }
+
+    // 내 정보 조회
+    public MemberInfoResponse getMyInfo(String email) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
+
+        // 응답용 DTO 변환해서 반환
+        return MemberInfoResponse.from(member);
+    }
+
+    // 내 정보 수정
+    // @Teansactional: 트랜잭션 종료 시 변경된 데이터를 감지하여 자동으로 DB 업데이트 (Dirty Checking: 변경 감지)
+    @Transactional
+    public MemberInfoResponse updateMyInfo(String email, MemberUpdateRequest request) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다"));
+
+        // 정보 변경
+        member.updateInfo(request.getNickname(), request.getFuelType(), request.getRadius());
+
+        // 수정된 정보를 DTO로 변환해서 반환
+        return MemberInfoResponse.from(member);
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void deleteMyAccount(String email) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다"));
+
+        // DB에서 삭제
+        memberRepository.delete(member);
     }
 
 }
