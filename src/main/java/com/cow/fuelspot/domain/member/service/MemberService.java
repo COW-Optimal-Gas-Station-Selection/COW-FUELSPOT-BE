@@ -61,6 +61,8 @@ public class MemberService {
         // 응답 객체 생성
         // 프론트엔드에 필요한 정보들을 모두 담아서 반환
         return LoginResponse.builder()
+                .isSuccess(true)
+                .message("로그인 성공")
                 .memberId(member.getId()) // 회원 고유 ID
                 .accessToken(accessToken) // 인증 토큰
                 .nickname(member.getNickname()) // 닉네임
