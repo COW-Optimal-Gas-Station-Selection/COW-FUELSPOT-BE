@@ -9,6 +9,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class LoginResponse {
+    private Boolean isSuccess;
+    private String message;
     private Long memberId;
     private String accessToken; // Jwt 액세스 토큰
     private String nickname;
