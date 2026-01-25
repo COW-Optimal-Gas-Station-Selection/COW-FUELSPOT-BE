@@ -1,6 +1,8 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
@@ -8,17 +10,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NearbyResponse {
-    private String id;
-    private String name;
-    private String brand;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AverageStationResponse {
+    @JsonProperty("id")
+    @JsonAlias("UNI_ID")
     private Integer priceGasoline;
     private Integer priceDiesel;
     private Integer priceLpg;
     private Integer pricePremiumGasoline;
     private Integer priceKerosene;
-    private Integer distance;
-    private String lat;
-    private String lon;
+
 
 }

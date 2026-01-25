@@ -1,10 +1,12 @@
 package com.cow.fuelspot.domain.station.client;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
+import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +25,7 @@ public class GasStationApiClient {
     private final ObjectMapper objectMapper;
     private final String RADIUS_API_URL = "https://www.opinet.co.kr/api/aroundAll.do";
     private final String DETAIL_API_URL = "https://www.opinet.co.kr/api/detailById.do";
+    private final String AVERAGE_API_URL ="https://www.opinet.co.kr/api/avgAllPrice.do";
 
     @Value("${opinet.api-key}")
     private String apiKey;
@@ -65,6 +68,16 @@ public class GasStationApiClient {
             return response.getRESULT().getOIL().get(0);
         }
         return null;
+    }
+
+    private OpinetAverageDto getAverageGasStation(String id) {
+        URI url = UriComponentsBuilder.fromUriString(DETAIL_API_URL)
+                .queryParam("out","json")
+                .queryParam(  "code",apiKey)
+                .build()
+                .toUri();
+        OpinetAverageDto dto = fetchAndParse(url, OpinetAverageDto.class);
+        return dto;
     }
 
     //URL 빌더
@@ -118,6 +131,21 @@ public class GasStationApiClient {
         private static class DetailResult {
             @JsonProperty("OIL")
             private List<OpinetDetailDto> OIL;
+        }
+    }
+
+    //계층 표시용
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class OpinetAverageResponse {
+        @JsonProperty("RESULT")
+        private AverageResult RESULT;
+
+        @Getter
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        private static class AverageResult {
+            @JsonProperty("OIL")
+            private AverageStationResponse OIL;
         }
     }
 }

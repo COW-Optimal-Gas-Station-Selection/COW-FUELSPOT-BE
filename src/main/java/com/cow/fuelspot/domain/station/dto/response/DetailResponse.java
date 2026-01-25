@@ -20,6 +20,8 @@ public class DetailResponse {
     private Integer priceGasoline;
     private Integer priceDiesel;
     private Integer priceLpg;
+    private Integer pricePremiumGasoline;
+    private Integer priceKerosene;
     private String tradeDate;
     private String tradeTime;
 
@@ -28,6 +30,8 @@ public class DetailResponse {
         Integer gasoline = null;
         Integer diesel = null;
         Integer lpg = null;
+        Integer premiumGasoline = null;
+        Integer kerosene = null;
         String tradeDate = null;
         String tradeTime = null;
 
@@ -39,6 +43,8 @@ public class DetailResponse {
                     case GASOLINE -> gasoline = priceDto.getPrice();
                     case DIESEL -> diesel = priceDto.getPrice();
                     case LPG -> lpg = priceDto.getPrice();
+                    case PREMIUM_GASOLINE ->   premiumGasoline=priceDto.getPrice();
+                    case KEROSENE ->  kerosene = priceDto.getPrice();
                 }
                 //TODO 판단 기준
                 tradeDate=priceDto.getTradeDate();

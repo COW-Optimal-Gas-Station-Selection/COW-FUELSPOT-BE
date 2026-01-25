@@ -19,6 +19,9 @@ public class NearbyRequest {
     @NotNull
     private Integer radius;
 
+    @NotNull
+    private FuelType fuelType;
+
     public String getLatString() {
         return formatDouble(this.lat);
     }
