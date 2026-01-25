@@ -1,23 +1,37 @@
 package com.cow.fuelspot.domain.station.dto.request;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Builder
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NearbyRequest {
-    @NotBlank
-    private String lat;
+    @NotNull
+    private Double lat;
 
-    @NotBlank
-    private String lon;
+    @NotNull
+    private Double lon;
 
     @NotNull
     private Integer radius;
 
-    @NotNull
-    private FuelType fuelType;
+    public String getLatString() {
+        return formatDouble(this.lat);
+    }
+
+    public String getLonString() {
+        return formatDouble(this.lon);
+    }
+
+    private String formatDouble(Double value) {
+        if (value == null) return null;
+        if (value == value.longValue()) {
+            return String.format("%d", value.longValue());
+        }
+        return String.valueOf(value);
+    }
 }
