@@ -9,7 +9,7 @@ import java.util.List;
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
 
-    List<Favorite> findAllMember(Member member);
+    List<Favorite> findAllByMember(Member member);
 
     boolean existsByMemberAndStationId(Member member, String stationId);
 
