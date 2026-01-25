@@ -8,6 +8,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 // 보안 설정 클래스
 @Configuration
@@ -16,8 +22,10 @@ public class SecurityConfig {
 
     // 보안 필터 체인 설정
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 // CSRF 보안 비활성화 (CSRF : 쿠키/세션 기반 인증에서 해커가 사용자의 로그인을 도용하는 공격)
                 // JWT(토큰) 방식 사용 예정 & Postman 테스트 편의를 위해 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
@@ -32,6 +40,26 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // 프론트엔드 주소 허용 (모두 허용)
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        // HTTP 메서드 허용
+        configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        // 헤더 허용
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // 인증 정보(토큰) 허용
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     // 비밀번호 암호화 도구 등록
