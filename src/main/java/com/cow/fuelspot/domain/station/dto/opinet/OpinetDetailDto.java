@@ -20,7 +20,7 @@ public class OpinetDetailDto {
     private String id;//주유소 코드
 
     @JsonProperty("brand")
-    @JsonAlias({"POLL_DIV_CD", "POLL_DIV_CO", "M_POLL_DIV_CO"})
+    @JsonAlias({"POLL_DIV_CD"})
     private String brand;//상표
 
     @JsonProperty("name")

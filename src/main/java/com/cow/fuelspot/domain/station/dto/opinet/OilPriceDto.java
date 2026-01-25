@@ -1,5 +1,6 @@
 package com.cow.fuelspot.domain.station.dto.opinet;
 
+import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +16,7 @@ public class OilPriceDto {
 
     @JsonProperty("fuelType")
     @JsonAlias("PRODCD")
-    private String type;
+    private FuelType type;
 
     @JsonProperty("price")
     @JsonAlias("PRICE")

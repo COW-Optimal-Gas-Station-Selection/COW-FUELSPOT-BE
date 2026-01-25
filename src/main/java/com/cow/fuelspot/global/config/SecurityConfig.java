@@ -1,18 +1,28 @@
 package com.cow.fuelspot.global.config;
 
+import com.cow.fuelspot.global.jwt.JwtAuthenticationFilter;
+import com.cow.fuelspot.global.jwt.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// 보안 설정 클래스
+// 보안 설정 총괄 클래스
+// 스프링 시큐리티의 규칙 정의
 @Configuration
 @EnableWebSecurity // 보안 기능 활성화
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtTokenProvider jwtTokenProvider; // 필터에 넣어줄 토큰 검사 도구
 
     // 보안 필터 체인 설정
     @Bean
@@ -22,19 +32,35 @@ public class SecurityConfig {
                 // JWT(토큰) 방식 사용 예정 & Postman 테스트 편의를 위해 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
 
+                // 세션 사용 안 함 (JWT 사용하기 때문)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 // 출입 권한 설정 (어떤 주소로 들어올 때 검사를 할지 말지 정하는 곳)
                 .authorizeHttpRequests(auth -> auth
-                        // "/api/members" 로 오는 요청(회원가입)은 무조건 허용(permitAll)
-                        .requestMatchers("/api/members").permitAll()
+                                       
+                        // 로그인(/api/auth/login)이나 토큰 재발급 등 인증 관련 요청은 무조건 허용 (permitAll)
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // "/api/members" 로 오는 요청(회원가입)은 무조건 허용 (permitAll)
+                        .requestMatchers(HttpMethod.POST, "/api/members").permitAll()
+
+                        // 스웨거 관련 주소 2개를 "프리패스"로 설정!
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/gas-stations/**").permitAll()
+                                       
                         // 그 외의 모든 요청은 인증된(로그인한) 사람만 통과
                         .anyRequest().authenticated()
-                );
+                )
+
+                // 커스텀 필터 등록
+                // 스프링 시큐리티의 기본 필터가 작동하기 전에
+                // 개발자가 만든 JwtAuthenticationFilter를 먼저 작동시켜 토큰 검사
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
 
-    // 비밀번호 암호화 도구 등록
+    // 비밀번호 암호화 도구 등록 (회원가입/로그인 시 사용)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // 강력하고 대중적인 해시 암호화 도구
