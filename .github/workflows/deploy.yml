@@ -2,7 +2,9 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - chore/cicd-setting
 
 jobs:
   build-and-deploy:
@@ -71,6 +73,7 @@ jobs:
               -e TZ=Asia/Seoul \
               -e OPINET_API_KEY=${{ secrets.OPINET_API_KEY }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
 
       # 5. [중요] 작업이 끝나면 IP 제거 (문 닫기 ) - 실패해도 무조건 실행

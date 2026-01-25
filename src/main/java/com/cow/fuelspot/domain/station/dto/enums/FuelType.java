@@ -1,8 +1,11 @@
 package com.cow.fuelspot.domain.station.dto.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 @Getter
 @RequiredArgsConstructor
@@ -15,7 +18,17 @@ public enum FuelType {
     private final String description;
 
     @JsonValue
-    public String toString() {
-        return this.code; // "B027" 반환
+    public String getCode() {
+        return code;
+    }
+
+    @JsonCreator
+    public static FuelType fromCode(String code) {
+        if (code == null) return null;
+
+        return Arrays.stream(FuelType.values())
+                .filter(type -> type.getCode().equals(code))
+                .findFirst()
+                .orElse(null);
     }
 }
