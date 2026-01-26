@@ -46,6 +46,7 @@ public class SecurityConfig {
                         // 스웨거 관련 주소 2개를 "프리패스"로 설정!
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/gas-stations/**").permitAll()
+                        .requestMatchers("/api/place/**").permitAll()
                                        
                         // 그 외의 모든 요청은 인증된(로그인한) 사람만 통과
                         .anyRequest().authenticated()
