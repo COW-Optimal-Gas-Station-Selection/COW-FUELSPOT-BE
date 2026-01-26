@@ -69,15 +69,17 @@ public class GasStationApiClient {
         }
         return null;
     }
-
-    private OpinetAverageDto getAverageGasStation(String id) {
-        URI url = UriComponentsBuilder.fromUriString(DETAIL_API_URL)
+    //평균 조회
+    public List<OpinetAverageDto> getAverageGasStation() {
+        URI url = UriComponentsBuilder.fromUriString(AVERAGE_API_URL)
                 .queryParam("out","json")
                 .queryParam(  "code",apiKey)
                 .build()
                 .toUri();
-        OpinetAverageDto dto = fetchAndParse(url, OpinetAverageDto.class);
-        return dto;
+        System.out.println("url: "+url);
+        OpinetAverageResponse response = fetchAndParse(url, OpinetAverageResponse.class);
+        System.out.println(List.of(response.getRESULT().getOIL().toArray(new OpinetAverageDto[0])));
+        return List.of(response.getRESULT().getOIL().toArray(new OpinetAverageDto[0]));
     }
 
     //URL 빌더
@@ -145,7 +147,7 @@ public class GasStationApiClient {
         @JsonIgnoreProperties(ignoreUnknown = true)
         private static class AverageResult {
             @JsonProperty("OIL")
-            private AverageStationResponse OIL;
+            private List<OpinetAverageDto> OIL;
         }
     }
 }

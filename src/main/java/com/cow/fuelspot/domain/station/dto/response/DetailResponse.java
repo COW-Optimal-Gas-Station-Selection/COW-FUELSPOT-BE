@@ -17,6 +17,7 @@ public class DetailResponse {
     private String lat;
     private String lon;
     private boolean isCarWash;
+    private boolean isMart;
     private Integer priceGasoline;
     private Integer priceDiesel;
     private Integer priceLpg;
@@ -62,6 +63,7 @@ public class DetailResponse {
                 .lat(dto.getLat())
                 .lon(dto.getLon())
                 .isCarWash("Y".equals(dto.getCarWashYn()))
+                .isMart("Y".equals(dto.getCvsYn()))
                 .priceGasoline(gasoline)
                 .priceDiesel(diesel)
                 .priceLpg(lpg)

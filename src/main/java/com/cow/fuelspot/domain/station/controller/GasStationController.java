@@ -3,6 +3,7 @@ package com.cow.fuelspot.domain.station.controller;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
+import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import com.cow.fuelspot.domain.station.service.OpinetService;
@@ -35,6 +36,12 @@ public class GasStationController {
     @GetMapping("/filter")
     public ResponseEntity<List<NearbyResponse>> getStationDetail(@Valid FilterRequest request) {
         List<NearbyResponse> stations = opinetService.getFilteredStations(request);
+        return ResponseEntity.ok(stations);
+    }
+
+    @GetMapping("/average")
+    public ResponseEntity<AverageStationResponse> getStationAverage() {
+        AverageStationResponse stations = opinetService.getAverageStation();
         return ResponseEntity.ok(stations);
     }
 }

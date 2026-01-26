@@ -1,90 +1,31 @@
 package com.cow.fuelspot.domain.station.dto.opinet;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.List;
-public class OpinetAverageDto{
 
-    @JsonProperty("RESULT")
-    private Result RESULT;
-
-    public Result getRESULT() {
-        return RESULT;
-    }
-
-    public void setRESULT(Result RESULT) {
-        this.RESULT = RESULT;
-    }
-
-    public static class Result {
-
-        @JsonProperty("OIL")
-        private List<Oil> OIL;
-
-        public List<Oil> getOIL() {
-            return OIL;
-        }
-
-        public void setOIL(List<Oil> OIL) {
-            this.OIL = OIL;
-        }
-    }
-
-    public static class Oil {
+@Getter
+@Setter
+@Builder
+public class OpinetAverageDto {
 
         @JsonProperty("TRADE_DT")
-        private String TRADE_DT;
-
+        @JsonAlias("TradeDT")
+        private String tradeDt;
         @JsonProperty("PRODCD")
-        private String PRODCD;
-
+        @JsonAlias("produce")
+        private String prodCd;
         @JsonProperty("PRODNM")
-        private String PRODNM;
-
+        @JsonAlias("tradeDT")
+        private String prodNm;
         @JsonProperty("PRICE")
-        private String PRICE;
-
+        @JsonAlias("price")
+        private String price;
         @JsonProperty("DIFF")
-        private String DIFF;
+        @JsonAlias("diff")
+        private String diff;
 
-        public String getTRADE_DT() {
-            return TRADE_DT;
-        }
-
-        public void setTRADE_DT(String TRADE_DT) {
-            this.TRADE_DT = TRADE_DT;
-        }
-
-        public String getPRODCD() {
-            return PRODCD;
-        }
-
-        public void setPRODCD(String PRODCD) {
-            this.PRODCD = PRODCD;
-        }
-
-        public String getPRODNM() {
-            return PRODNM;
-        }
-
-        public void setPRODNM(String PRODNM) {
-            this.PRODNM = PRODNM;
-        }
-
-        public String getPRICE() {
-            return PRICE;
-        }
-
-        public void setPRICE(String PRICE) {
-            this.PRICE = PRICE;
-        }
-
-        public String getDIFF() {
-            return DIFF;
-        }
-
-        public void setDIFF(String DIFF) {
-            this.DIFF = DIFF;
-        }
-    }
 }
-

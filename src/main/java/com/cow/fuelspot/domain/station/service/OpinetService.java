@@ -3,10 +3,12 @@ package com.cow.fuelspot.domain.station.service;
 import com.cow.fuelspot.domain.station.client.GasStationApiClient;
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.OilPriceDto;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
+import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -90,6 +92,39 @@ public class OpinetService {
         }
         int safePrice = (price == null) ? 0 : price;
         return (nearby.getDistance()/1000/ efficiency) * safePrice;
+    }
+
+    public AverageStationResponse getAverageStation() {
+        List<OpinetAverageDto> dtos = gasStationApiClient.getAverageGasStation();
+
+        return AverageStationResponse.builder()
+                .pricePremiumGasoline(extractPrice(dtos, FuelType.PREMIUM_GASOLINE))
+                .priceGasoline(extractPrice(dtos, FuelType.GASOLINE))
+                .priceDiesel(extractPrice(dtos, FuelType.DIESEL))
+                .priceKerosene(extractPrice(dtos, FuelType.KEROSENE))
+                .priceLpg(extractPrice(dtos, FuelType.LPG))
+                .build();
+    }
+
+    private Integer extractPrice(List<OpinetAverageDto> dtos, FuelType fuelType) {
+        return dtos.stream()
+                .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
+                .map(dto -> {
+                    Object val = dto.getPrice();
+                    if (val instanceof Number) {
+                        return ((Number) val).intValue();
+                    }
+                    if (val instanceof String) {
+                        try {
+                            return (int) Double.parseDouble((String) val);
+                        } catch (NumberFormatException e) {
+                            return 0;
+                        }
+                    }
+                    return 0;
+                })
+                .findFirst()
+                .orElse(0);
     }
 
     private void setPriceFromDetail(NearbyResponse.NearbyResponseBuilder builder, List<OilPriceDto> oilPrices) {

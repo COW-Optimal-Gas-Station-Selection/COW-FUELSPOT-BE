@@ -12,8 +12,6 @@ import lombok.*;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AverageStationResponse {
-    @JsonProperty("id")
-    @JsonAlias("UNI_ID")
     private Integer priceGasoline;
     private Integer priceDiesel;
     private Integer priceLpg;
