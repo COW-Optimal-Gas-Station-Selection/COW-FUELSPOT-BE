@@ -25,7 +25,7 @@ public class OpinetService {
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request) {
         Map<String, NearbyResponse.NearbyResponseBuilder> mergeMap = new LinkedHashMap<>();
         for (FuelType type : FuelType.values()) {
-            OpinetNearbyDto[] dtos = gasStationApiClient.getNearbyGasStations(request, type);
+            List<OpinetNearbyDto> dtos = gasStationApiClient.getNearbyGasStations(request, type);
             if (dtos != null) {
                 mergeByFuelType(mergeMap, dtos, type);
             }
@@ -44,11 +44,10 @@ public class OpinetService {
     }
     //필터 조회
     public List<NearbyResponse> getFilteredStations(FilterRequest request) {
-            OpinetNearbyDto[] nearbyDtos = gasStationApiClient.getStation(request);
-
+            List<OpinetNearbyDto> nearbyDtos = gasStationApiClient.getStation(request);
             if (nearbyDtos == null) return List.of();
 
-            return Arrays.stream(nearbyDtos)
+            return nearbyDtos.stream()
                     .parallel()
                     .map(nearby -> {
                         OpinetDetailDto detail = gasStationApiClient.getDetailGasStation(nearby.getId());
@@ -142,7 +141,7 @@ public class OpinetService {
     }
 
     private void mergeByFuelType(Map<String, NearbyResponse.NearbyResponseBuilder> mergeMap,
-                                 OpinetNearbyDto[] dtos,
+                                 List<OpinetNearbyDto> dtos,
                                  FuelType type) {
         for (OpinetNearbyDto dto : dtos) {
             String stationId = dto.getId();

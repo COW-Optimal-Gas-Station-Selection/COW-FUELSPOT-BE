@@ -11,7 +11,6 @@ import java.util.List;
 @Setter
 @Builder
 public class OpinetAverageDto {
-
         @JsonProperty("TRADE_DT")
         @JsonAlias("TradeDT")
         private String tradeDt;
@@ -27,5 +26,4 @@ public class OpinetAverageDto {
         @JsonProperty("DIFF")
         @JsonAlias("diff")
         private String diff;
-
 }

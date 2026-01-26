@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -36,23 +37,26 @@ public class GasStationApiClient {
     }
 
     //근처 주유소 조회
-    public OpinetNearbyDto[] getNearbyGasStations(NearbyRequest request, FuelType type) {
-        //이놈 형태 수정 예정
+    public List<OpinetNearbyDto> getNearbyGasStations(NearbyRequest request, FuelType type) {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
+
         if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {
-            return new OpinetNearbyDto[0];
+            return Collections.emptyList();
         }
-        return response.getRESULT().getOIL().toArray(new OpinetNearbyDto[0]);
+
+        return response.getRESULT().getOIL();
     }
-    public OpinetNearbyDto[] getStation(FilterRequest request) {
-        //이놈 형태 수정 예정
+
+    public List<OpinetNearbyDto> getStation(FilterRequest request) {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, request.getFuelType().getCode());
         OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
+
         if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {
-            return new OpinetNearbyDto[0];
+            return Collections.emptyList();
         }
-        return response.getRESULT().getOIL().toArray(new OpinetNearbyDto[0]);
+
+        return response.getRESULT().getOIL();
     }
 
     //상세 정보 조회

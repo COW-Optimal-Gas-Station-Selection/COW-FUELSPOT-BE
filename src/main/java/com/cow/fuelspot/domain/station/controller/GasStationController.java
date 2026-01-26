@@ -17,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/gas-stations")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class GasStationController {
     private final OpinetService opinetService;
     //근처 주유소 조회
