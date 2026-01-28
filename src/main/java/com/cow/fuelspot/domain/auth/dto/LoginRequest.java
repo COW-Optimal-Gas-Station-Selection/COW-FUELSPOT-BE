@@ -1,4 +1,4 @@
-package com.cow.fuelspot.domain.member.dto;
+package com.cow.fuelspot.domain.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
