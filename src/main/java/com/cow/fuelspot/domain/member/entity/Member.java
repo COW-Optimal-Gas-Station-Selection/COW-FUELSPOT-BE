@@ -52,4 +52,9 @@ public class Member {
         if (fuelType != null) this.fuelType = fuelType;
         if (radius != null) this.radius = radius;
     }
+
+    // 비즈니스 로직 (비밀번호 변경)
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

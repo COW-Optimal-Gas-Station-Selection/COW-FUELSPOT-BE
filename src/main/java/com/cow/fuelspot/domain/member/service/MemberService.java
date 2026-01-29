@@ -3,12 +3,15 @@ package com.cow.fuelspot.domain.member.service;
 import com.cow.fuelspot.domain.member.dto.MemberSignupRequest;
 import com.cow.fuelspot.domain.member.entity.Member;
 import com.cow.fuelspot.domain.member.repository.MemberRepository;
+import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
+import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
+import com.cow.fuelspot.domain.member.dto.PasswordChangeRequest;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
-import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
+
 
 // 회원 서비스 계층
 // 회원의 비즈니스 로직 처리 (회원가입, 로그인)
@@ -76,4 +79,24 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
+    @Transactional
+    public void changePassword(String email, PasswordChangeRequest request) {
+        // 회원 정보 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
+
+        // 현재 비밀번호 일치 여부 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다");
+        }
+
+        // 새 비밀번호와 기존 비밀번호 일치 여부 확인
+        if (request.getCurrentPassword().equals(request.getNewPassword())) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.");
+        }
+
+        // 새 비밀번호 암호화 및 변경
+        String encodeNewPassword = passwordEncoder.encode(request.getNewPassword());
+        member.changePassword(encodeNewPassword);
+    }
 }

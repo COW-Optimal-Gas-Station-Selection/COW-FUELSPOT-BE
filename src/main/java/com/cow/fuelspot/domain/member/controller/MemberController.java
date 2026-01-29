@@ -2,16 +2,18 @@ package com.cow.fuelspot.domain.member.controller;
 
 import com.cow.fuelspot.domain.member.service.MemberService;
 import com.cow.fuelspot.domain.member.dto.MemberSignupRequest;
+import com.cow.fuelspot.domain.member.dto.PasswordChangeRequest;
+import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
+import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
-import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
 import org.springframework.web.bind.annotation.PatchMapping;
 
 import java.util.HashMap;
@@ -28,12 +30,8 @@ public class MemberController {
 
     // 회원가입 API
     // POST /api/members
-    // @param request 회원가입 정보 (이메일, 비번, 닉네임 등)
-    // @return 성공 시 201 Created 상태 코드와 메시지 반환
     @PostMapping
     public ResponseEntity<Map<String, Object>> signup(@RequestBody @Valid MemberSignupRequest request) {
-        // @RequestBody: JSON -> 자바 객체로 변환
-        // @Valid: DTO의 조건 검사
 
         // 서비스에게 회원가입 위임 (중복 검사 -> 암호화 -> DB 저장)
         memberService.signup(request);
@@ -76,5 +74,17 @@ public class MemberController {
         memberService.deleteMyAccount(userDetails.getUsername());
 
         return ResponseEntity.noContent().build();
+    }
+
+    // 비밀번호 변경 API
+    // PATCH /api/members/password
+    @PatchMapping("/password")
+    public ResponseEntity<String> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid PasswordChangeRequest request) {
+
+        memberService.changePassword(userDetails.getUsername(), request);
+
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 }
