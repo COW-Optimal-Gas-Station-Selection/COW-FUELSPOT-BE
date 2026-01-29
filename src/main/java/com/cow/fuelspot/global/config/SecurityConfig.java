@@ -50,6 +50,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // "/api/members" 로 오는 요청(회원가입)은 무조건 허용 (permitAll)
                         .requestMatchers(HttpMethod.POST, "/api/members").permitAll()
+                        // 이메일 인증 및 비밀번호 찾기 API 허용
+                        .requestMatchers("/api/auth/email/**", "/api/auth/password/**").permitAll()
 
                         // 스웨거 관련 주소 2개를 "프리패스"로 설정!
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()

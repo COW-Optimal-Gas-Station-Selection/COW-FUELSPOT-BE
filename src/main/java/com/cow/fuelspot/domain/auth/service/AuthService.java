@@ -15,6 +15,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.cow.fuelspot.domain.auth.dto.EmailRequest;
+import com.cow.fuelspot.domain.auth.dto.EmailVerificationRequest;
+import com.cow.fuelspot.domain.auth.dto.PasswordResetRequest;
+import com.cow.fuelspot.domain.auth.entity.EmailVerification;
+import com.cow.fuelspot.domain.auth.repository.EmailVerificationRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.security.SecureRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +32,9 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -31,7 +42,7 @@ public class AuthService {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
-        // 실제로 검증이 일어나는 부분 (비밀번호 체크)
+        // 실제 검증 (비밀번호 체크)
         // authenticate()가 실행될 때 CustomUserDetailsService의 loadUserByUsername이 실행됨
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -62,21 +73,22 @@ public class AuthService {
                 .build();
     }
 
+    // 토큰 재발급
     @Transactional
     public TokenDto reissue(TokenReissueRequest request) {
-        // Refresh Token 검증
+        // Refresh Token 유효성 검사
         if (!jwtTokenProvider.validateToken(request.getRefreshToken())) {
             throw new IllegalArgumentException("Refresh Token이 유효하지 않습니다.");
         }
 
-        // Access Token 에서 Member ID (email) 가져오기
+        // Access Token 에서 회원 이메일 추출
         Authentication authentication = jwtTokenProvider.getAuthentication(request.getAccessToken());
 
-        // 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
+        // DB에서 해당 회원 Refresh Token 가져오기
         RefreshToken refreshToken = refreshTokenRepository.findById(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("로그아웃 된 사용자입니다."));
 
-        // Refresh Token 일치하는지 검사
+        // 요청받은 토큰과 DB의 토큰 일치 여부 검사
         if (!refreshToken.getValue().equals(request.getRefreshToken())) {
             throw new IllegalArgumentException("토큰의 유저 정보가 일치하지 않습니다.");
         }
@@ -90,8 +102,72 @@ public class AuthService {
         return tokenDto;
     }
 
+    // 로그아웃 (DB에서 Refresh Token 삭제)
     @Transactional
     public void logout(String email) {
         refreshTokenRepository.deleteById(email);
     }
+
+    // 인증 코드 발송
+    @Transactional
+    public void sendVerificationCode(EmailRequest request) {
+        // 가입된 이메일인지 확인
+        if(!memberRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
+        }
+
+        // 6자리 랜덤 숫자 코드 생성
+        String code = createRandomCode();
+
+        // Redis 저장
+        EmailVerification verification = EmailVerification.builder()
+                .email(request.getEmail())
+                .code(code)
+                .build();
+        emailVerificationRepository.save(verification);
+
+        // 이메일 전송 (비동기)
+        emailService.sendEmail(request.getEmail(), "[FuelSpot] 비밀번호 찾기 인증 코드",
+                "<h3>인증 코드: " + code + "</h3><p>5분 안에 입력해주세요.</p>");
+    }
+
+    // 인증 코드 검증
+    public void verifyCode(EmailVerificationRequest request) {
+        // Redis에서 이메일로 저장된 코드 조회
+        EmailVerification verification = emailVerificationRepository.findById(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("인증 코드가 만료되었거나 잘못되었습니다."));
+
+        // 저장된 코드와 입력받은 코드가 일치하는지 비교
+        if (!verification.getCode().equals(request.getCode())) {
+            throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
+        }
+    }
+
+    // 비밀번호 재설정
+    @Transactional
+    public void resetPassword(PasswordResetRequest request) {
+        // 인증 코드 재검증
+        verifyCode(new EmailVerificationRequest(request.getEmail(), request.getCode()));
+
+        // 회원 정보 조회
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+
+        // 비밀번호 암호화 및 번경
+        member.changePassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // 사용한 인증 코드 Redis에서 삭제
+        emailVerificationRepository.deleteById(request.getEmail());
+    }
+
+    // 6자리 랜덤 숫자 생성
+    private String createRandomCode() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder key = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            key.append(random.nextInt(10));
+        }
+        return key.toString();
+    }
+
 }
