@@ -61,30 +61,46 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            # 1. 도커 네트워크 생성 (앱과 Redis가 통신할 방 만들기)
+            # 도커 네트워크 생성
             docker network create fuelspot-net || true
-            
-            # 2. Redis 컨테이너 실행 (없을 때만 실행)
+
+            # Redis 실행 
             if ! docker ps | grep -q "fuelspot-redis"; then
               docker run -d --name fuelspot-redis \
                 --network fuelspot-net \
                 -p 6379:6379 \
                 redis:alpine
             fi
+
+            # MySQL 실행
+            if ! docker ps | grep -q "fuelspot_db"; then
+              docker run -d --name fuelspot-db \
+                --network fuelspot-net \
+                -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                -e MYSQL_DATABASE=fuelspot_db \
+                -e TZ=Asia/Seoul \
+                mysql:8.0
+            fi
             
-            # 3. 기존 앱 컨테이너 정리
+            # DB 켜질 때까지 10초 대기
+            sleep 10
+
+            # 기존 앱 삭제
             docker stop fuelspot-app || true
             docker rm fuelspot-app || true
             
-            # 4. 최신 이미지 받기
+            # 최신 앱 이미지 다운로드
             docker pull ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
             
-            # 5. 앱 실행 (환경변수 추가 & 네트워크 연결)
+            # 앱 실행 (DB, Redis 연결 설정 포함)
             docker run -d \
               --name fuelspot-app \
               --network fuelspot-net \
               -p 8080:8080 \
               -e TZ=Asia/Seoul \
+              -e SPRING_DATASOURCE_URL="jdbc:mysql://fuelspot-db:3306/fuelspot_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" \
+              -e SPRING_DATASOURCE_USERNAME=root \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e OPINET_API_KEY=${{ secrets.OPINET_API_KEY }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
@@ -93,8 +109,9 @@ jobs:
               -e REDIS_HOST=fuelspot-redis \
               -e REDIS_PORT=6379 \
               ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
+            
 
-      # 5. [중요] 작업이 끝나면 IP 제거 (문 닫기 ) - 실패해도 무조건 실행
+      # 5. 작업이 끝나면 IP 제거 - 실패해도 무조건 실행
       - name: Remove Github Action IP from Security group
         if: always()
         run: |
