@@ -24,6 +24,6 @@ public class OpinetAverageDto {
         @JsonAlias("price")
         private String price;
         @JsonProperty("DIFF")
-        @JsonAlias("diff")
+        @JsonAlias("diff") // 상승률
         private String diff;
 }

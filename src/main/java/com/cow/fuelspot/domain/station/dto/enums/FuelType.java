@@ -20,17 +20,21 @@ public enum FuelType {
     private final String description;
 
     @JsonValue
-    public String getCode() {
-        return code;
+    public String toValue() {
+        return this.name(); // GASOLINE, DIESEL 등 enum 이름 반환
     }
 
     @JsonCreator
     public static FuelType fromCode(String code) {
         if (code == null) return null;
 
-        return Arrays.stream(FuelType.values())
-                .filter(type -> type.getCode().equals(code))
-                .findFirst()
-                .orElse(null);
+        try {
+            return FuelType.valueOf(code.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Arrays.stream(FuelType.values())
+                    .filter(type -> type.getCode().equals(code))
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 }

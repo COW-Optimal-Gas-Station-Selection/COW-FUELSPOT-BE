@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpinetNearbyDto {
+
     //출력시 반환
     @JsonProperty("id")
     //오피넷에서 들어오는 데이터 찾을 때 사용
@@ -36,9 +37,9 @@ public class OpinetNearbyDto {
 
     @JsonProperty("lat")
     @JsonAlias("GIS_X_COOR")
-    private String lat;
+    private Double lat;
 
     @JsonProperty("lon")
     @JsonAlias("GIS_Y_COOR")
-    private String lon;
+    private Double lon;
 }

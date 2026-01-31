@@ -1,22 +1,24 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import lombok.*;
 
+import java.util.Map;
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class AverageStationResponse {
-    private Integer priceGasoline;
-    private Integer priceDiesel;
-    private Integer priceLpg;
-    private Integer pricePremiumGasoline;
-    private Integer priceKerosene;
+    private Map<FuelType, AveragePriceInfo> prices;
 
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class AveragePriceInfo {
+        private Integer average;              // 전국 평균 가격
+        private Double weeklyChange;          // 주간 변동률 (%)
+    }
 
+    public static AverageStationResponse of(Map<FuelType, AveragePriceInfo> prices) {
+        return new AverageStationResponse(prices);
+    }
 }

@@ -2,6 +2,7 @@ package com.cow.fuelspot.domain.station.dto.request;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,11 +12,12 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 public class FilterRequest{
-        @NotNull
+        @NotNull(message = "위도는 필수 입력값 입니다.")
         private double lat;          // 위도
-        @NotNull
+        @NotNull(message = "경도는 필수 입력값 입니다.")
         private Double lon;          // 경도
-        @NotNull
+        @NotNull(message = "반경는 필수 입력값 입니다.")
+        @Positive(message = "반경은 0보다 커야 합니다.")
         private Integer radius;       // 반경
         @NotNull
         private FuelType fuelType;   // 유종 Enum

@@ -1,14 +1,17 @@
 package com.cow.fuelspot.domain.station.service;
 
 import com.cow.fuelspot.domain.station.client.GasStationApiClient;
+import com.cow.fuelspot.domain.station.component.FuelCalculator;
+import com.cow.fuelspot.domain.station.component.OpinetMapper;
+import com.cow.fuelspot.domain.station.component.StationFilter;
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
-import com.cow.fuelspot.domain.station.dto.opinet.OilPriceDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
+import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,153 +22,76 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OpinetService {
-    private static final int efficiency =  15; // 연비 가상
+
     private final GasStationApiClient gasStationApiClient;
-    //근처 조회
+    private final FuelCalculator fuelCalculator;
+    private final StationFilter stationFilter;
+    private final OpinetMapper opinetMapper;
+
+    // 근처 주유소 조회
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request) {
-        Map<String, NearbyResponse.NearbyResponseBuilder> mergeMap = new LinkedHashMap<>();
+        Map<String, NearbyResponse> mergeMap = new LinkedHashMap<>();
+
         for (FuelType type : FuelType.values()) {
             List<OpinetNearbyDto> dtos = gasStationApiClient.getNearbyGasStations(request, type);
             if (dtos != null) {
-                mergeByFuelType(mergeMap, dtos, type);
+                for (OpinetNearbyDto dto : dtos) {
+                    //없는 경우
+                    if (mergeMap.containsKey(dto.getId())) {
+                        mergeMap.get(dto.getId()).getPrices().put(type, dto.getPrice());
+                    }//있는 경우
+                    else {
+                        mergeMap.put(dto.getId(), opinetMapper.toNearbyResponse(dto, type, dto.getPrice()));
+                    }
+                }
             }
         }
+
         return mergeMap.values().stream()
-                .map(NearbyResponse.NearbyResponseBuilder::build)
-                .sorted(Comparator.comparingDouble(
-                        (NearbyResponse nearby) -> calculateFuelConsumption(nearby, request.getFuelType())
-                ))
+                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, request.getFuelType())))
                 .collect(Collectors.toList());
+    }
 
+    // 주유소 상세 조회
+    public DetailResponse getDetailGasStation(String id) {
+        OpinetDetailDto detailDto = gasStationApiClient.getDetailGasStation(id);
+        return opinetMapper.toDetailResponse(detailDto);
     }
-    //세부사항 조회
-    public OpinetDetailDto getDetailGasStation(String id) {
-        return gasStationApiClient.getDetailGasStation(id);
-    }
-    //필터 조회
+
+    // 필터 기반 주유소 조회
     public List<NearbyResponse> getFilteredStations(FilterRequest request) {
-            List<OpinetNearbyDto> nearbyDtos = gasStationApiClient.getStation(request);
-            if (nearbyDtos == null) return List.of();
+        List<OpinetNearbyDto> nearbyDtos = gasStationApiClient.getStation(request);
+        if (nearbyDtos == null) return List.of();
 
-            return nearbyDtos.stream()
-                    .parallel()
-                    .map(nearby -> {
-                        OpinetDetailDto detail = gasStationApiClient.getDetailGasStation(nearby.getId());
-                        return new Object() {
-                            final OpinetNearbyDto n = nearby;
-                            final OpinetDetailDto d = detail;
-                        };
-                    })
-                    .filter(pair -> pair.d != null &&
-                            (request.getIsCarWash() == null || !request.getIsCarWash() || "Y".equals(pair.d.getCarWashYn())) &&
-                            (request.getIsStore() == null || !request.getIsStore() || "Y".equals(pair.d.getCvsYn())) &&
-                            (request.getBrand() == null || request.getBrand().equals(pair.n.getBrand()))
-                    )
-                .<NearbyResponse>map(pair -> {
-                    NearbyResponse.NearbyResponseBuilder builder = NearbyResponse.builder()
-                            .id(pair.n.getId())
-                            .name(pair.n.getName())
-                            .brand(pair.n.getBrand())
-                            .distance(pair.n.getDistance())
-                            .lat(pair.n.getLat())
-                            .lon(pair.n.getLon());
-
-                    setPriceFromDetail(builder, pair.d.getOilPrices());
-
-                    return builder.build();
-                })
-                    .sorted(Comparator.comparingDouble(
-                            nearby -> calculateFuelConsumption((NearbyResponse) nearby, request.getFuelType())
-                    ))
-                .collect(Collectors.toUnmodifiableList());
-    }
-    //효율 계산
-    private double calculateFuelConsumption(NearbyResponse nearby, FuelType type) {
-        Integer price = 0;
-        switch (type) {
-            case GASOLINE -> price = nearby.getPriceGasoline();
-            case DIESEL -> price = nearby.getPriceDiesel();
-            case LPG -> price = nearby.getPriceLpg();
-            case PREMIUM_GASOLINE -> price = nearby.getPricePremiumGasoline();
-            case KEROSENE -> price = nearby.getPriceKerosene();
-        }
-        int safePrice = (price == null) ? 0 : price;
-        return (nearby.getDistance()/1000/ efficiency) * safePrice;
+        return nearbyDtos.stream()
+                .parallel()
+                .map(nearby -> new StationPair(nearby, gasStationApiClient.getDetailGasStation(nearby.getId())))
+                .filter(pair -> stationFilter.isMatch(pair.nearby(), pair.detail(), request))
+                .map(pair -> opinetMapper.toNearbyResponse(pair.nearby(), pair.detail()))
+                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, request.getFuelType())))
+                .collect(Collectors.toList());
     }
 
+    // 전국 평균 유가 조회
     public AverageStationResponse getAverageStation() {
         List<OpinetAverageDto> dtos = gasStationApiClient.getAverageGasStation();
 
-        return AverageStationResponse.builder()
-                .pricePremiumGasoline(extractPrice(dtos, FuelType.PREMIUM_GASOLINE))
-                .priceGasoline(extractPrice(dtos, FuelType.GASOLINE))
-                .priceDiesel(extractPrice(dtos, FuelType.DIESEL))
-                .priceKerosene(extractPrice(dtos, FuelType.KEROSENE))
-                .priceLpg(extractPrice(dtos, FuelType.LPG))
-                .build();
-    }
+        Map<FuelType, AverageStationResponse.AveragePriceInfo> prices = new HashMap<>();
 
-    private Integer extractPrice(List<OpinetAverageDto> dtos, FuelType fuelType) {
-        return dtos.stream()
-                .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
-                .map(dto -> {
-                    Object val = dto.getPrice();
-                    if (val instanceof Number) {
-                        return ((Number) val).intValue();
-                    }
-                    if (val instanceof String) {
-                        try {
-                            return (int) Double.parseDouble((String) val);
-                        } catch (NumberFormatException e) {
-                            return 0;
-                        }
-                    }
-                    return 0;
-                })
-                .findFirst()
-                .orElse(0);
-    }
+        for (FuelType fuelType : FuelType.values()) {
+            Integer average = opinetMapper.extractAveragePrice(dtos, fuelType);
+            Double weeklyChange = opinetMapper.extractWeeklyChange(dtos, fuelType);
 
-    private void setPriceFromDetail(NearbyResponse.NearbyResponseBuilder builder, List<OilPriceDto> oilPrices) {
-        if (oilPrices == null || oilPrices.isEmpty()) return;
-
-        for (OilPriceDto priceDto : oilPrices) {
-
-            int price = priceDto.getPrice();
-            switch (priceDto.getType()) {
-                case GASOLINE -> builder.priceGasoline(price);
-                case DIESEL -> builder.priceDiesel(price);
-                case LPG -> builder.priceLpg(price);
-            }
-        }
-    }
-
-    private void mergeByFuelType(Map<String, NearbyResponse.NearbyResponseBuilder> mergeMap,
-                                 List<OpinetNearbyDto> dtos,
-                                 FuelType type) {
-        for (OpinetNearbyDto dto : dtos) {
-            String stationId = dto.getId();
-            NearbyResponse.NearbyResponseBuilder builder = mergeMap.computeIfAbsent(stationId, id ->
-                    NearbyResponse.builder()
-                            .id(id)
-                            .name(dto.getName())
-                            .brand(dto.getBrand())
-                            .distance(dto.getDistance())
-                            .lat(dto.getLat())
-                            .lon(dto.getLon())
+            prices.put(fuelType, AverageStationResponse.AveragePriceInfo.builder()
+                    .average(average)
+                    .weeklyChange(weeklyChange)
+                    .build()
             );
-            fillPrice(builder, type, dto.getPrice());
         }
+
+
+        return AverageStationResponse.of(prices);
     }
 
-    private void fillPrice(NearbyResponse.NearbyResponseBuilder builder, FuelType type, Integer price) {
-        if (price == null || price == 0) return;
-        switch (type) {
-            case GASOLINE -> builder.priceGasoline(price);
-            case DIESEL -> builder.priceDiesel(price);
-            case LPG -> builder.priceLpg(price);
-            case PREMIUM_GASOLINE ->builder.pricePremiumGasoline(price);
-            case KEROSENE -> builder.priceKerosene(price);
-        }
-    }
+    private record StationPair(OpinetNearbyDto nearby, OpinetDetailDto detail) {}
 }

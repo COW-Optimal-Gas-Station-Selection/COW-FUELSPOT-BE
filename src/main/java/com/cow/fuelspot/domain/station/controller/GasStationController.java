@@ -29,9 +29,8 @@ public class GasStationController {
     //주유소 상세 정보 조회
     @GetMapping("/{stationId}")
     public ResponseEntity<DetailResponse> getStationDetail(@PathVariable String stationId) {
-        OpinetDetailDto dto = opinetService.getDetailGasStation(stationId);
-        DetailResponse detail = DetailResponse.from(dto);
-        return ResponseEntity.ok(detail);
+        DetailResponse detial = opinetService.getDetailGasStation(stationId);
+        return ResponseEntity.ok(detial);
     }
     //필터 조회
     @GetMapping("/filter")

@@ -1,7 +1,9 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
+import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import lombok.*;
+
+import java.util.Map;
 
 @Getter
 @Setter
@@ -12,13 +14,10 @@ public class NearbyResponse {
     private String id;
     private String name;
     private String brand;
-    private Integer priceGasoline;
-    private Integer priceDiesel;
-    private Integer priceLpg;
-    private Integer pricePremiumGasoline;
-    private Integer priceKerosene;
-    private Integer distance;
-    private String lat;
-    private String lon;
 
+    private Map<FuelType, Integer> prices;
+
+    private Integer distance;
+    private Double lat;
+    private Double lon;
 }
