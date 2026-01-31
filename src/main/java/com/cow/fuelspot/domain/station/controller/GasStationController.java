@@ -7,7 +7,12 @@ import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import com.cow.fuelspot.domain.station.service.OpinetService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.websocket.OnMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,35 +23,45 @@ import java.util.List;
 @RequestMapping("/api/gas-stations")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "GasStation", description = "주유소 관련 API")
 public class GasStationController {
     private final OpinetService opinetService;
-    //근처 주유소 조회
+
+    @Operation(summary = "근처 주유소 조회", description = "위치 기반으로 근처 주유소를 조회합니다.")
     @GetMapping("/nearby")
     public ResponseEntity<List<NearbyResponse>> getNearbyStations(@Valid NearbyRequest request) {
         List<NearbyResponse> stations = opinetService.getNearbyGasStations(request);
         return ResponseEntity.ok(stations);
     }
-    //주유소 상세 정보 조회
+
+    @Operation(summary = "주유소 상세 정보 조회", description = "특정 주유소의 상세 정보를 조회합니다.")
     @GetMapping("/{stationId}")
-    public ResponseEntity<DetailResponse> getStationDetail(@PathVariable String stationId) {
+    public ResponseEntity<DetailResponse> getStationDetail(
+            @Parameter(description = "오피넷 주유소 ID", example = "A0009912")
+            @PathVariable String stationId) {
         DetailResponse detial = opinetService.getDetailGasStation(stationId);
         return ResponseEntity.ok(detial);
     }
-    //필터 조회
+
+    @Operation(summary = "필터 조회", description = "필터 조건에 맞는 주유소를 조회합니다.")
     @GetMapping("/filter")
     public ResponseEntity<List<NearbyResponse>> getStationDetail(@Valid FilterRequest request) {
         List<NearbyResponse> stations = opinetService.getFilteredStations(request);
         return ResponseEntity.ok(stations);
     }
 
+    @Operation(summary = "전국 평균 가격 조회", description = "전국 주유소의 평균 가격을 조회합니다.")
     @GetMapping("/average")
     public ResponseEntity<AverageStationResponse> getStationAverage() {
         AverageStationResponse stations = opinetService.getAverageStation();
         return ResponseEntity.ok(stations);
     }
 
+    @Operation(summary = "시도별 평균 가격 조회", description = "특정 시도의 평균 가격을 조회합니다.")
     @GetMapping("/average/sido")
-    public ResponseEntity<AverageStationResponse> getStationSidoAverage(String sido) {
+    public ResponseEntity<AverageStationResponse> getStationSidoAverage(
+            @Parameter(description = "시도명", example = "SEOUL")
+            @RequestParam @NotBlank(message = "시도는 필수 요소 입니다.") String sido) {
         AverageStationResponse stations = opinetService.getSidoAverageStation(sido);
         return  ResponseEntity.ok(stations);
     }
