@@ -1,10 +1,7 @@
 package com.cow.fuelspot.domain.station.component;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
-import com.cow.fuelspot.domain.station.dto.opinet.OilPriceDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
+import com.cow.fuelspot.domain.station.dto.opinet.*;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import org.springframework.stereotype.Component;
@@ -102,10 +99,30 @@ public class OpinetMapper {
                 .orElse(0);
     }
 
+
+
     public Double extractWeeklyChange(List<OpinetAverageDto> dtos, FuelType fuelType) {
         return dtos.stream()
                 .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
                 .map(this::parseDiff)
+                .findFirst()
+                .orElse(0.0);
+    }
+
+    public Integer extractSidoAveragePrice(List<OpinetSidoAverageDto> dtos, FuelType fuelType) {
+        return dtos.stream()
+                .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
+                .map(this::parsePriceSido)
+                .findFirst()
+                .orElse(0);
+    }
+
+
+
+    public Double extractSidoWeeklyChange(List<OpinetSidoAverageDto> dtos, FuelType fuelType) {
+        return dtos.stream()
+                .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
+                .map(this::parseDiffSido)
                 .findFirst()
                 .orElse(0.0);
     }
@@ -124,6 +141,32 @@ public class OpinetMapper {
     }
 
     private Double parseDiff(OpinetAverageDto dto) {
+        Object val = dto.getDiff();
+        if (val instanceof Number n) return n.doubleValue();
+        if (val instanceof String s) {
+            try {
+                return Double.parseDouble(s);
+            } catch (Exception e) {
+                return 0.0;
+            }
+        }
+        return 0.0;
+    }
+
+    private Integer parsePriceSido(OpinetSidoAverageDto dto) {
+        Object val = dto.getPrice();
+        if (val instanceof Number n) return n.intValue();
+        if (val instanceof String s) {
+            try {
+                return (int) Double.parseDouble(s);
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    private Double parseDiffSido(OpinetSidoAverageDto dto) {
         Object val = dto.getDiff();
         if (val instanceof Number n) return n.doubleValue();
         if (val instanceof String s) {

@@ -8,6 +8,7 @@ import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
+import com.cow.fuelspot.domain.station.dto.opinet.OpinetSidoAverageDto;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
@@ -90,6 +91,25 @@ public class OpinetService {
         }
 
 
+        return AverageStationResponse.of(prices);
+    }
+
+    //시도별 평균 유가 조회
+    public AverageStationResponse getSidoAverageStation(String sido) {
+        List<OpinetSidoAverageDto> dtos = gasStationApiClient.getsidoAverageGasStation(sido);
+
+        Map<FuelType, AverageStationResponse.AveragePriceInfo> prices = new HashMap<>();
+
+        for (FuelType fuelType : FuelType.values()) {
+            Integer average = opinetMapper.extractSidoAveragePrice(dtos, fuelType);
+            Double weeklyChange = opinetMapper.extractSidoWeeklyChange(dtos, fuelType);
+
+            prices.put(fuelType, AverageStationResponse.AveragePriceInfo.builder()
+                    .average(average)
+                    .weeklyChange(weeklyChange)
+                    .build()
+            );
+        }
         return AverageStationResponse.of(prices);
     }
 

@@ -1,10 +1,7 @@
 package com.cow.fuelspot.domain.station.client;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
-import com.cow.fuelspot.domain.station.dto.opinet.OpinetResponse;
+import com.cow.fuelspot.domain.station.dto.opinet.*;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +22,7 @@ public class GasStationApiClient {
     private final String RADIUS_API_URL = "https://www.opinet.co.kr/api/aroundAll.do";
     private final String DETAIL_API_URL = "https://www.opinet.co.kr/api/detailById.do";
     private final String AVERAGE_API_URL ="https://www.opinet.co.kr/api/avgAllPrice.do";
+    private final String AVERAGE_SIDO_API_URL ="https://www.opinet.co.kr/api/avgSidoPrice.do";
 
     @Value("${opinet.api-key}")
     private String apiKey;
@@ -68,6 +66,17 @@ public class GasStationApiClient {
                 .build()
                 .toUri();
         OpinetResponse<OpinetAverageDto> response = fetchAndParse(url, OpinetAverageDto.class);
+        return response.getOilList();
+    }
+    //시도별 조회
+    public List<OpinetSidoAverageDto> getsidoAverageGasStation(String sido) {
+        URI url = UriComponentsBuilder.fromUriString(AVERAGE_API_URL)
+                .queryParam("out","json")
+                .queryParam("code", apiKey)
+                .queryParam("sido", sido)
+                .build()
+                .toUri();
+        OpinetResponse<OpinetSidoAverageDto> response = fetchAndParse(url, OpinetSidoAverageDto.class);
         return response.getOilList();
     }
 

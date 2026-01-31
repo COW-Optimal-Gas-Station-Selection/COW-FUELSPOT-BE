@@ -44,4 +44,10 @@ public class GasStationController {
         AverageStationResponse stations = opinetService.getAverageStation();
         return ResponseEntity.ok(stations);
     }
+
+    @GetMapping("/average/sido")
+    public ResponseEntity<AverageStationResponse> getStationSidoAverage(String sido) {
+        AverageStationResponse stations = opinetService.getSidoAverageStation(sido);
+        return  ResponseEntity.ok(stations);
+    }
 }
