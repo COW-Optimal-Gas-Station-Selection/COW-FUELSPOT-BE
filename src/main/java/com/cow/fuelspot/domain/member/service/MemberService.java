@@ -3,13 +3,17 @@ package com.cow.fuelspot.domain.member.service;
 import com.cow.fuelspot.domain.member.dto.MemberSignupRequest;
 import com.cow.fuelspot.domain.member.entity.Member;
 import com.cow.fuelspot.domain.member.repository.MemberRepository;
+import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
+import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
+import com.cow.fuelspot.domain.member.dto.PasswordChangeRequest;
+import com.cow.fuelspot.global.common.code.ErrorCode;
+import com.cow.fuelspot.global.common.exception.CustomException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.cow.fuelspot.domain.member.dto.LoginRequest;
-import com.cow.fuelspot.domain.member.dto.LoginResponse;
-import com.cow.fuelspot.global.jwt.JwtTokenProvider;
+
 
 // 회원 서비스 계층
 // 회원의 비즈니스 로직 처리 (회원가입, 로그인)
@@ -21,52 +25,68 @@ public class MemberService {
     // 생성자 주입
     private final MemberRepository memberRepository; // DB 접근 도구
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 도구
-    private final JwtTokenProvider jwtTokenProvider; // JWT 토큰 생성 도구
 
-    // 회원가입 기능
+    // 회원가입
     // 이메일 중복 체크, 비밀번호 암호화, DB 저장
     @Transactional
-    public void signup(MemberSignupRequest request) {
-        // 이메일 중복 검사
+    public Long signup(MemberSignupRequest request) {
         if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-        // DTO -> Entity 변환 (DTO 속 toEntity 메서드 사용)
         Member member = request.toEntity(encodedPassword);
 
-        // DB 저장
-        memberRepository.save(member);
+        // DB 저장 및 ID 반환
+        Member savedMember = memberRepository.save(member);
+        return savedMember.getId();
     }
 
-    // 로그인 기능
-    // 이메일 존재 여부 확인, 비밀번호 일치 여부 확인, 인증 성공 시 JWT 토큰 발급 및 사용자 정보 반환
-    public LoginResponse login(LoginRequest request) {
-        // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+    // 내 정보 조회
+    public MemberInfoResponse getMyInfo(String email) {
+        Member member = findMemberByEmail(email);
+        return MemberInfoResponse.from(member);
+    }
 
-        // 비밀번호 검증
-        // 사용자가 직접 입력한 비번(requset)과 DB에 있는 암호화된 비번(member)을 비교
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+    // 내 정보 수정
+    // @Transactional: 트랜잭션 종료 시 변경된 데이터를 감지하여 자동으로 DB 업데이트 (Dirty Checking: 변경 감지)
+    @Transactional
+    public MemberInfoResponse updateMyInfo(String email, MemberUpdateRequest request) {
+        Member member = findMemberByEmail(email);
+        member.updateInfo(request.getNickname(), request.getFuelType(), request.getRadius());
+        return MemberInfoResponse.from(member);
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void deleteMyAccount(String email) {
+        Member member = findMemberByEmail(email);
+        memberRepository.delete(member);
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public void changePassword(String email, PasswordChangeRequest request) {
+        Member member = findMemberByEmail(email);
+
+        // 현재 비밀번호 일치 여부 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
+            throw new CustomException(ErrorCode.PASSWORD_MISMATCH);
         }
 
-        // (인증 성공 후) 토큰 생성
-        String accessToken = jwtTokenProvider.createToken(member.getEmail());
+        // 새 비밀번호와 기존 비밀번호 일치 여부 확인
+        if (request.getCurrentPassword().equals(request.getNewPassword())) {
+            throw new CustomException(ErrorCode.SAME_AS_OLD_PASSWORD);
+        }
 
-        // 응답 객체 생성
-        // 프론트엔드에 필요한 정보들을 모두 담아서 반환
-        return LoginResponse.builder()
-                .memberId(member.getId()) // 회원 고유 ID
-                .accessToken(accessToken) // 인증 토큰
-                .nickname(member.getNickname()) // 닉네임
-                .fuelType(member.getFuelType()) // 선호 유종
-                .radius(member.getRadius()) // 선호 반경
-                .build();
+        // 새 비밀번호 암호화 및 변경
+        String encodeNewPassword = passwordEncoder.encode(request.getNewPassword());
+        member.changePassword(encodeNewPassword);
     }
 
+    // 이메일로 회원 찾기 (공통 메서드)
+    private Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    }
 }

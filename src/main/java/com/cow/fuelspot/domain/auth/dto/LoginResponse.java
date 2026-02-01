@@ -1,4 +1,4 @@
-package com.cow.fuelspot.domain.member.dto;
+package com.cow.fuelspot.domain.auth.dto;
 
 import com.cow.fuelspot.domain.member.entity.FuelType;
 import lombok.Builder;
@@ -10,8 +10,8 @@ import lombok.Getter;
 @Builder
 public class LoginResponse {
     private Long memberId;
-    private String accessToken; // Jwt 액세스 토큰
     private String nickname;
     private FuelType fuelType;
     private Integer radius;
+    private TokenDto tokenDto; // 토큰 관련 정보
 }

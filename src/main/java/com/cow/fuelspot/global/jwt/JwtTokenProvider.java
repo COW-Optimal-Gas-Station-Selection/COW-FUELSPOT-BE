@@ -1,75 +1,98 @@
 package com.cow.fuelspot.global.jwt;
 
+import com.cow.fuelspot.domain.auth.dto.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 // JWT 토큰 관리자
 // 토큰을 생성, 검증, 정보 추출, 인증 객체 조회를 담당
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
-    private final Key key; // 토큰을 암호화(서명)할 때 사용할 비밀키
-    private final long accessTokenValidityInMilliseconds; // 액세스 토큰의 유효 시간 (1시간)
-    private final UserDetailsService userDetailsService; // 회원 정보를 DB에서 찾아오는 역할
+    // 토큰을 만들 때 사용하는 재료
+    private static final String AUTHORITIES_KEY = "auth"; // 권한 정보의 키값
+    private static final String BEARER_TYPE = "Bearer"; // 토큰 타입
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30 ; // 30분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7; // 7일
 
-    // 생성자: application.yml에서 비밀키를 가져와서 초기화
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            UserDetailsService userDetailsService) {
-        // Base64로 인코딩된 비밀키를 디코딩하여 바이트 배열로 변환
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        // 바이트 배열을 기반으로 암호화 키 객체 생성
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-        // 토큰 유효 시간 설정: 1시간
-        this.accessTokenValidityInMilliseconds = 1000 * 60 * 60;
-        this.userDetailsService = userDetailsService;
+    private final Key key; // 토큰 암호화용 비밀키
+
+    // 생성자 (yml 파일에 있는 비밀번호를 가져와 Key 객체 생성)
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey); // 디코딩
+        this.key = Keys.hmacShaKeyFor(keyBytes); // 키 객체 변환
     }
 
-    // 토큰 발급
-    // 로그인 성공 시 유저 이메일 정보를 받아 JWT 토큰 생성
-    public String createToken(String email) {
-        long now = (new Date()).getTime();
-        // 만료 시간 계산
-        Date validity = new Date(now + this.accessTokenValidityInMilliseconds);
+    // 토큰 생성
+    // 인증 객체(Authentication) -> Access + Refresh 토큰 생성
+    public TokenDto generateTokenDto(Authentication authentication) {
+        // 권한 불러오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
-        return Jwts.builder()
-                .setSubject(email) // 토큰의 주인으로 이메일 설정
-                .setIssuedAt(new Date()) // 토큰 발행 시간 설정
-                .setExpiration(validity) // 토큰 만료 시간 설정
-                .signWith(key, SignatureAlgorithm.HS256) // 비밀키와 HS256 알고리즘으로 서명(암호화)
-                .compact(); // 설정된 내용들을 압축하여 문자열로 반환
+        long now = (new Date()).getTime(); // 현재 시간
+
+        // Access Token 생성 (내용물: 유저 이름, 권한, 만료시간)
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        String accessToken = Jwts.builder()
+                .setSubject(authentication.getName()) // 이메일
+                .claim(AUTHORITIES_KEY, authorities) // 권한 정보
+                .setExpiration(accessTokenExpiresIn) // 유효기간
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        // Refresh Token 생성 (내용물: 만료시간)
+        String refreshToken = Jwts.builder()
+                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .refreshToken(refreshToken)
+                .build();
     }
 
     // 인증 객체 생성
     // 토큰 -> DB 회원 조회 -> 로그인 상태 확정
-    public Authentication getAuthentication(String token) {
-        // 토큰에서 이메일 추출
-        String email = getEmail(token);
-        // DB에서 디테일한 회원 정보 가져오기 (존재 여부 확인)
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        // 스프링 시큐리티가 인증되었다고 인정하는 공식 신분증 반환
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
+    public Authentication getAuthentication(String accessToken) {
+        // 토큰 분해
+        Claims claims = parseClaims(accessToken);
 
-    // 이메일 추출
-    // 토큰에 들어있는 이메일을 꺼냄
-    public String getEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key) // 비밀키를 설정하여 서명 확인
-                .build()
-                .parseClaimsJws(token) // 토큰 해석
-                .getBody() // 내용물을 가져옴
-                .getSubject(); // 저장된 이메일 반환
+        // 권한 정보 확인
+        if (claims.get(AUTHORITIES_KEY) == null) {
+            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+        }
+
+        // 권한 목록 생성
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+        // 유저 객체 생성
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
     // 토큰 검증
@@ -80,14 +103,24 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            System.out.println("잘못된 JWT 서명입니다."); // 서명이 일치하지 않음 (위조 가능성)
+            log.info("잘못된 JWT 서명입니다."); // 서명이 일치하지 않음 (위조 가능성)
         } catch (ExpiredJwtException e) {
-            System.out.println("만료된 JWT 토큰입니다."); // 유효시간 만료
+            log.info("만료된 JWT 토큰입니다."); // 유효시간 만료
         } catch (UnsupportedJwtException e) {
-            System.out.println("지원되지 않는 JWT 토큰입니다."); // 형식이 다름
+            log.info("지원되지 않는 JWT 토큰입니다."); // 형식이 다름
         } catch (IllegalArgumentException e) {
-            System.out.println("JWT 토큰이 잘못되었습니다."); // 토큰 값이 비어있음
+            log.info("JWT 토큰이 잘못되었습니다."); // 토큰 값이 비어있음
         }
         return false;
+    }
+
+    // Claims: 토큰 안에 저장된 정보 조각들
+    private Claims parseClaims(String accessToken) {
+        try {
+            //
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 }
