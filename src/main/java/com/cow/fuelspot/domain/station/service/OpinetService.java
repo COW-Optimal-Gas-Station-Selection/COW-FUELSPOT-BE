@@ -36,11 +36,12 @@ public class OpinetService {
     // 근처 주유소 조회(우선순위 request FuelType<-로그인 유저 타입<-기본값(가솔린))
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request, Authentication authentication) {
         FuelType fuelType = null;
+        System.out.println(authentication.getName());
         if(request.getFuelType()==null){
             //유저 정보(선호유종) 조회
             if(authentication!=null) {
                 String userId = authentication.getName();
-                fuelType = memberRepository.findFuelTypeByMemberId(userId);
+                fuelType = memberRepository.findFuelTypeByMemberId(userId);;
             }
             //기본값 설정(가솔린)
             if (fuelType==null){

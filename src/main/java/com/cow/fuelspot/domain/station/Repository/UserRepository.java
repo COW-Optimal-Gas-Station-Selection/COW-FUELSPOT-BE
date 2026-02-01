@@ -12,7 +12,7 @@ public class UserRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public FuelType findFuelTypeByMemberId(String memberId) {
-        String sql = "SELECT fuelType FROM member WHERE id = ?";
+        String sql = "SELECT fuel_type FROM member WHERE email = ?";
         try {
             String fuelTypeStr = jdbcTemplate.queryForObject(sql, String.class, memberId);
             return fuelTypeStr != null ? FuelType.valueOf(fuelTypeStr) : null;
