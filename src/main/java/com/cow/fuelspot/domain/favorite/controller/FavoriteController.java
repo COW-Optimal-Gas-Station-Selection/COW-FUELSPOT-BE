@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/favorites")
 @RequiredArgsConstructor
@@ -41,5 +43,12 @@ public class FavoriteController {
     @GetMapping("/count/{stationId}")
     public ResponseEntity<Long> getFavoriteCount(@Parameter(description = "오피넷 주유소 ID", example = "A0001234") @PathVariable String stationId) {
         return ResponseEntity.ok(favoriteService.getFavoriteCount(stationId));
+    }
+
+    @Operation(summary = "내 즐겨찾기 목록 조회", description = "현재 로그인한 사용자의 즐겨찾기 목록을 조회합니다.")
+    @GetMapping
+    public ResponseEntity<List<FavoriteResponse>> getMyFavorites(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(favoriteService.getMemberFavorites(email));
     }
 }

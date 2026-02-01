@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -46,5 +48,14 @@ public class FavoriteService {
 
     public long getFavoriteCount(String stationId) {
         return favoriteRepository.countByStationId(stationId);
+    }
+
+    public List<FavoriteResponse> getMemberFavorites(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+        return favoriteRepository.findAllByMember(member)
+                .stream()
+                .map(FavoriteResponse::from)
+                .toList();
     }
 }
