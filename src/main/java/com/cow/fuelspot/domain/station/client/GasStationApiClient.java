@@ -35,7 +35,7 @@ public class GasStationApiClient {
     //근처 주유소 조회
     public OpinetNearbyDto[] getNearbyGasStations(NearbyRequest request, FuelType type) {
         //이놈 형태 수정 예정
-        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
+        URI url = buildUri(RADIUS_API_URL, request.getLon(), request.getLat(), request.getRadius(), 1, type.getCode());
         OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
         if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {
             return new OpinetNearbyDto[0];
@@ -44,7 +44,7 @@ public class GasStationApiClient {
     }
     public OpinetNearbyDto[] getStation(FilterRequest request) {
         //이놈 형태 수정 예정
-        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, request.getFuelType().getCode());
+        URI url = buildUri(RADIUS_API_URL, request.getLon(), request.getLat(), request.getRadius(), 1, request.getFuelType().getCode());
         OpinetListResponse response = fetchAndParse(url, OpinetListResponse.class);
         if (response == null || response.getRESULT() == null || response.getRESULT().getOIL() == null) {
             return new OpinetNearbyDto[0];

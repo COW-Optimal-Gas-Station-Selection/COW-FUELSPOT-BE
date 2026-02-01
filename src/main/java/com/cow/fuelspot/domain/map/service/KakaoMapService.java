@@ -3,6 +3,7 @@ package com.cow.fuelspot.domain.map.service;
 import com.cow.fuelspot.domain.map.dto.KakaoAddressResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoDirectionsResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoSearchResponse;
+import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ public class KakaoMapService {
     private static final String KAKAO_DIRECTIONS_URL = "https://apis-navi.kakaomobility.com/v1/directions";
     private static final String KAKAO_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
     private static final String KAKAO_COORD_URL = "https://dapi.kakao.com/v2/local/geo/coord2address.json";
+    private static final String KAKAO_TRANSCOORD_URL = "https://dapi.kakao.com/v2/local/geo/transcoord.json";
 
     public KakaoDirectionsResponse getRoute(String origin, String destination, String waypoints) {
 
@@ -134,4 +136,62 @@ public class KakaoMapService {
             throw new RuntimeException("주소 변환 중 오류가 발생했습니다");
         }
     }
+
+    public KakaoTranscoordResponse getKTMCoords(String x, String y) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoRestApiKey);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
+                .queryParam("x", x)
+                .queryParam("y", y)
+                .queryParam("input_coord", "WGS84")
+                .queryParam("output_coord", "KTM")
+                .build()
+                .toUri();
+
+        try {
+            ResponseEntity<KakaoTranscoordResponse> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    entity,
+                    KakaoTranscoordResponse.class
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("KTM 변환 실패: {}", e.getMessage());
+            throw new RuntimeException("KTM 변환 호출 중 오류가 발생했습니다.");
+        }
+    }
+
+
+    public KakaoTranscoordResponse getWGS84Coords(String x, String y) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoRestApiKey);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
+                .queryParam("x", x)
+                .queryParam("y", y)
+                .queryParam("input_coord", "KTM")
+                .queryParam("output_coord", "WGS84")
+                .build()
+                .toUri();
+
+        try {
+            ResponseEntity<KakaoTranscoordResponse> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    entity,
+                    KakaoTranscoordResponse.class
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("WGS84 변환 실패: {}", e.getMessage());
+            return null;
+        }
+    }
+
 }
