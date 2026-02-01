@@ -31,7 +31,14 @@ public enum ErrorCode {
     // 이메일
     UNABLE_TO_SEND_EMAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 발송에 실패했습니다."),
     VERIFICATION_CODE_NOT_FOUND(HttpStatus.BAD_REQUEST, "유효하지 않거나 만료된 인증 코드입니다."),
-    VERIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다.");
+    VERIFICATION_CODE_MISMATCH(HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
+
+    // 주유소 서비스
+    STATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디로 조회된 주유소 상세 정보가 없습니다."),
+    STATION_API_COMMUNICATION_ERROR(HttpStatus.BAD_GATEWAY, "주유소 서버 통신에 실패했습니다."),
+    STATION_DATA_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 분석 중 오류가 발생했습니다."),
+    STATION_SYSTEM_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "정보 처리 과정에서 시스템 오류가 발생했습니다."),
+    STATION_NO_CONTENT(HttpStatus.NO_CONTENT, "조회된 정보가 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
