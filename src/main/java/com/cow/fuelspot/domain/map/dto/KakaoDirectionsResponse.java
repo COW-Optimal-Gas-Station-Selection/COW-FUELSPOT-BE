@@ -1,6 +1,5 @@
 package com.cow.fuelspot.domain.map.dto;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -21,11 +20,6 @@ public class KakaoDirectionsResponse {
     @Getter
     @NoArgsConstructor
     public static class Route {
-        @JsonProperty("result_code")
-        private Integer resultCode;
-
-        @JsonProperty("result_msg")
-        private String resultMsg;
 
         @JsonProperty("summary")
         private Summary summary;
