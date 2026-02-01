@@ -9,8 +9,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class LoginResponse {
-    private Boolean isSuccess;
-    private String message;
     private Long memberId;
     private String nickname;
     private FuelType fuelType;
