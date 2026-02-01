@@ -1,6 +1,7 @@
 package com.cow.fuelspot.domain.station.client;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.*;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
@@ -69,11 +70,11 @@ public class GasStationApiClient {
         return response.getOilList();
     }
     //시도별 조회
-    public List<OpinetSidoAverageDto> getsidoAverageGasStation(String sido) {
-        URI url = UriComponentsBuilder.fromUriString(AVERAGE_API_URL)
+    public List<OpinetSidoAverageDto> getsidoAverageGasStation(Sido sido) {
+        URI url = UriComponentsBuilder.fromUriString(AVERAGE_SIDO_API_URL)
                 .queryParam("out","json")
                 .queryParam("code", apiKey)
-                .queryParam("sido", sido)
+                .queryParam("sido", sido.getCode())
                 .build()
                 .toUri();
         OpinetResponse<OpinetSidoAverageDto> response = fetchAndParse(url, OpinetSidoAverageDto.class);

@@ -1,10 +1,12 @@
 package com.cow.fuelspot.domain.station.service;
 
+import com.cow.fuelspot.domain.station.Repository.UserRepository;
 import com.cow.fuelspot.domain.station.client.GasStationApiClient;
 import com.cow.fuelspot.domain.station.component.FuelCalculator;
 import com.cow.fuelspot.domain.station.component.OpinetMapper;
 import com.cow.fuelspot.domain.station.component.StationFilter;
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
@@ -15,6 +17,7 @@ import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,9 +31,21 @@ public class OpinetService {
     private final FuelCalculator fuelCalculator;
     private final StationFilter stationFilter;
     private final OpinetMapper opinetMapper;
+    private final UserRepository memberRepository;
 
     // 근처 주유소 조회
-    public List<NearbyResponse> getNearbyGasStations(NearbyRequest request) {
+    public List<NearbyResponse> getNearbyGasStations(NearbyRequest request, Authentication authentication) {
+        FuelType fuelType = request.getFuelType();
+        //유저 정보(선호유종) 조회
+        if(authentication!=null) {
+            String userId = authentication.getName();
+            fuelType = memberRepository.findFuelTypeByMemberId(userId);
+        }
+        //기본값 설정(가솔린)
+        if (fuelType==null){
+            fuelType=FuelType.GASOLINE;
+        }
+        System.out.println("fuelType="+fuelType);
         Map<String, NearbyResponse> mergeMap = new LinkedHashMap<>();
 
         for (FuelType type : FuelType.values()) {
@@ -47,9 +62,9 @@ public class OpinetService {
                 }
             }
         }
-
+        FuelType finalFuelType = fuelType;
         return mergeMap.values().stream()
-                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, request.getFuelType())))
+                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, finalFuelType)))
                 .collect(Collectors.toList());
     }
 
@@ -95,7 +110,7 @@ public class OpinetService {
     }
 
     //시도별 평균 유가 조회
-    public AverageStationResponse getSidoAverageStation(String sido) {
+    public AverageStationResponse getSidoAverageStation(Sido sido) {
         List<OpinetSidoAverageDto> dtos = gasStationApiClient.getsidoAverageGasStation(sido);
 
         Map<FuelType, AverageStationResponse.AveragePriceInfo> prices = new HashMap<>();

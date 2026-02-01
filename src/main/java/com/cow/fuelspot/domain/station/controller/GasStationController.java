@@ -1,5 +1,6 @@
 package com.cow.fuelspot.domain.station.controller;
 
+import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
@@ -12,9 +13,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.websocket.OnMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +34,9 @@ public class GasStationController {
 
     @Operation(summary = "근처 주유소 조회", description = "위치 기반으로 근처 주유소를 조회합니다.")
     @GetMapping("/nearby")
-    public ResponseEntity<List<NearbyResponse>> getNearbyStations(@Valid NearbyRequest request) {
-        List<NearbyResponse> stations = opinetService.getNearbyGasStations(request);
+    public ResponseEntity<List<NearbyResponse>> getNearbyStations(@Valid NearbyRequest request,
+                                                                  Authentication authentication) {
+        List<NearbyResponse> stations = opinetService.getNearbyGasStations(request, authentication);
         return ResponseEntity.ok(stations);
     }
 
@@ -61,8 +67,10 @@ public class GasStationController {
     @GetMapping("/average/sido")
     public ResponseEntity<AverageStationResponse> getStationSidoAverage(
             @Parameter(description = "시도명", example = "SEOUL")
-            @RequestParam @NotBlank(message = "시도는 필수 요소 입니다.") String sido) {
+            @RequestParam @NotNull(message = "시도는 필수 요소 입니다.") Sido sido) {
+
         AverageStationResponse stations = opinetService.getSidoAverageStation(sido);
-        return  ResponseEntity.ok(stations);
+        return ResponseEntity.ok(stations);
     }
+
 }
