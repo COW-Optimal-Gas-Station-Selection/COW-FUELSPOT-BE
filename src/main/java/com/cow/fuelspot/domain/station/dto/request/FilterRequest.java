@@ -19,7 +19,6 @@ public class FilterRequest{
         @NotNull(message = "반경는 필수 입력값 입니다.")
         @Positive(message = "반경은 0보다 커야 합니다.")
         private Integer radius;       // 반경
-        @NotNull
         private FuelType fuelType;   // 유종 Enum
         private String brand;        // 브랜드
         private Boolean isCarWash;   // 세차장 여부

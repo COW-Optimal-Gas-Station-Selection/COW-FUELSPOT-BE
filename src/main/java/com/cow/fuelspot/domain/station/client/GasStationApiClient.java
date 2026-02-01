@@ -39,8 +39,8 @@ public class GasStationApiClient {
         return response.getOilList();
     }
     // 필터 조회
-    public List<OpinetNearbyDto> getStation(FilterRequest request) {
-        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, request.getFuelType().getCode());
+    public List<OpinetNearbyDto> getStation(FilterRequest request, FuelType type) {
+        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         return response.getOilList();
     }

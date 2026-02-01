@@ -20,20 +20,4 @@ public class NearbyRequest {
     @Positive(message = "반경은 0보다 커야 합니다.")
     private Integer radius;       // 반경
     private FuelType fuelType;
-
-    public String getLatString() {
-        return formatDouble(this.lat);
-    }
-
-    public String getLonString() {
-        return formatDouble(this.lon);
-    }
-
-    private String formatDouble(Double value) {
-        if (value == null) return null;
-        if (value == value.longValue()) {
-            return String.format("%d", value.longValue());
-        }
-        return String.valueOf(value);
-    }
 }

@@ -51,8 +51,9 @@ public class GasStationController {
 
     @Operation(summary = "필터 조회", description = "필터 조건에 맞는 주유소를 조회합니다.")
     @GetMapping("/filter")
-    public ResponseEntity<List<NearbyResponse>> getStationDetail(@Valid FilterRequest request) {
-        List<NearbyResponse> stations = opinetService.getFilteredStations(request);
+    public ResponseEntity<List<NearbyResponse>> getStationDetail(@Valid FilterRequest request,
+                                                                 Authentication authentication) {
+        List<NearbyResponse> stations = opinetService.getFilteredStations(request,authentication);
         return ResponseEntity.ok(stations);
     }
 

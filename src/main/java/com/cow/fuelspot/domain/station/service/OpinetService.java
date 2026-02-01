@@ -33,19 +33,22 @@ public class OpinetService {
     private final OpinetMapper opinetMapper;
     private final UserRepository memberRepository;
 
-    // 근처 주유소 조회
+    // 근처 주유소 조회(우선순위 request FuelType<-로그인 유저 타입<-기본값(가솔린))
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request, Authentication authentication) {
-        FuelType fuelType = request.getFuelType();
-        //유저 정보(선호유종) 조회
-        if(authentication!=null) {
-            String userId = authentication.getName();
-            fuelType = memberRepository.findFuelTypeByMemberId(userId);
+        FuelType fuelType = null;
+        if(request.getFuelType()==null){
+            //유저 정보(선호유종) 조회
+            if(authentication!=null) {
+                String userId = authentication.getName();
+                fuelType = memberRepository.findFuelTypeByMemberId(userId);
+            }
+            //기본값 설정(가솔린)
+            if (fuelType==null){
+                fuelType=FuelType.GASOLINE;
+            }
+        }else{
+            fuelType = request.getFuelType();
         }
-        //기본값 설정(가솔린)
-        if (fuelType==null){
-            fuelType=FuelType.GASOLINE;
-        }
-        System.out.println("fuelType="+fuelType);
         Map<String, NearbyResponse> mergeMap = new LinkedHashMap<>();
 
         for (FuelType type : FuelType.values()) {
@@ -74,17 +77,34 @@ public class OpinetService {
         return opinetMapper.toDetailResponse(detailDto);
     }
 
-    // 필터 기반 주유소 조회
-    public List<NearbyResponse> getFilteredStations(FilterRequest request) {
-        List<OpinetNearbyDto> nearbyDtos = gasStationApiClient.getStation(request);
+    // 필터 기반 주유소 조회(우선순위 request FuelType<-로그인 유저 타입<-기본값(가솔린))
+    public List<NearbyResponse> getFilteredStations(FilterRequest request, Authentication authentication) {
+        FuelType fuelType = null;
+        if(request.getFuelType()==null){
+            //유저 정보(선호유종) 조회
+            if(authentication!=null) {
+                String userId = authentication.getName();
+                fuelType = memberRepository.findFuelTypeByMemberId(userId);
+            }
+            //기본값 설정(가솔린)
+            if (fuelType==null){
+                fuelType=FuelType.GASOLINE;
+            }
+        }else{
+            fuelType = request.getFuelType();
+        }
+
+        List<OpinetNearbyDto> nearbyDtos = gasStationApiClient.getStation(request,fuelType);
         if (nearbyDtos == null) return List.of();
+
+        FuelType finalFuelType = fuelType;
 
         return nearbyDtos.stream()
                 .parallel()
                 .map(nearby -> new StationPair(nearby, gasStationApiClient.getDetailGasStation(nearby.getId())))
                 .filter(pair -> stationFilter.isMatch(pair.nearby(), pair.detail(), request))
                 .map(pair -> opinetMapper.toNearbyResponse(pair.nearby(), pair.detail()))
-                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, request.getFuelType())))
+                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, finalFuelType)))
                 .collect(Collectors.toList());
     }
 
