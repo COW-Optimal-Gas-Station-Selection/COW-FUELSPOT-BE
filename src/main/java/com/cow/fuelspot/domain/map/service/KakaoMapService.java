@@ -3,6 +3,7 @@ package com.cow.fuelspot.domain.map.service;
 import com.cow.fuelspot.domain.map.dto.KakaoAddressResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoDirectionsResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoSearchResponse;
+import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
 import com.cow.fuelspot.global.common.code.ErrorCode;
 import com.cow.fuelspot.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,10 @@ public class KakaoMapService {
     private static final String KAKAO_DIRECTIONS_URL = "https://apis-navi.kakaomobility.com/v1/directions";
     private static final String KAKAO_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
     private static final String KAKAO_COORD_URL = "https://dapi.kakao.com/v2/local/geo/coord2address.json";
+    private static final String KAKAO_TRANSCOORD_URL = "https://dapi.kakao.com/v2/local/geo/transcoord.json";
 
     // 길찾기
-    public KakaoDirectionsResponse getRoute(String origin, String destination) {
+    public KakaoDirectionsResponse findRoute(String origin, String destination) {
 
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_DIRECTIONS_URL)
                 .queryParam("origin", origin)
@@ -47,7 +49,7 @@ public class KakaoMapService {
     }
 
     // 장소 검색
-    public KakaoSearchResponse searchResponse(String keyword) {
+    public KakaoSearchResponse searchPlaces(String keyword) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_SEARCH_URL)
                 .queryParam("query", keyword)
                 .queryParam("size", 10)
@@ -56,8 +58,8 @@ public class KakaoMapService {
         return callKakaoApi(uri, KakaoSearchResponse.class);
     }
 
-    // 주소 변환
-    public String getAddressFromCoords(String x, String y) {
+    // 좌표 -> 주소 변환
+    public String convertCoordsToAddress(String x, String y) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_COORD_URL)
                 .queryParam("x", x)
                 .queryParam("y", y)
@@ -82,6 +84,28 @@ public class KakaoMapService {
         }
         // 못 찾으면 null 반환
         return null;
+    }
+
+    public KakaoTranscoordResponse convertWGS84ToKTM(String x, String y) {
+        URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
+                .queryParam("x", x)
+                .queryParam("y", y)
+                .queryParam("input_coord", "WGS84")
+                .queryParam("output_coord", "KTM")
+                .build().encode().toUri();
+
+        return callKakaoApi(uri, KakaoTranscoordResponse.class);
+    }
+
+    public KakaoTranscoordResponse convertKTMToWGS84(String x, String y) {
+        URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
+                .queryParam("x", x)
+                .queryParam("y", y)
+                .queryParam("input_coord", "KTM")
+                .queryParam("output_coord", "WGS84")
+                .build().encode().toUri();
+
+        return callKakaoApi(uri, KakaoTranscoordResponse.class);
     }
 
     // 공통 호출 메서드
