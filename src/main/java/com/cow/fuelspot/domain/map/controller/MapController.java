@@ -3,6 +3,7 @@ package com.cow.fuelspot.domain.map.controller;
 import com.cow.fuelspot.domain.map.dto.KakaoAddressResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoDirectionsResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoSearchResponse;
+import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
 import com.cow.fuelspot.domain.map.service.KakaoMapService;
 import com.cow.fuelspot.global.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,27 +21,44 @@ public class MapController {
     private final KakaoMapService kakaoMapService;
 
     @GetMapping("/direction")
-    public ResponseEntity<ApiResponse<KakaoDirectionsResponse>> getDirections(
+    public ResponseEntity<ApiResponse<KakaoDirectionsResponse>> findRoute(
             @RequestParam String origin,
-            @RequestParam String destination,
-            @RequestParam(required = false) String waypoints
+            @RequestParam String destination
     ){
-        KakaoDirectionsResponse response = kakaoMapService.getRoute(origin, destination);
+        KakaoDirectionsResponse response = kakaoMapService.findRoute(origin, destination);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<KakaoSearchResponse>> searchPlace(@RequestParam String keyword) {
-        KakaoSearchResponse response = kakaoMapService.searchResponse(keyword);
+        KakaoSearchResponse response = kakaoMapService.searchPlaces(keyword);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
     @GetMapping("/address")
-    public ResponseEntity<ApiResponse<String>> getAddress(
+    public ResponseEntity<ApiResponse<String>> convertCoordsToAddress(
             @RequestParam String x,
             @RequestParam String y
     ) {
-        String response = kakaoMapService.getAddressFromCoords(x, y);
+        String response = kakaoMapService.convertCoordsToAddress(x, y);
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    @GetMapping("/convert/wgs84-to-ktm")
+    public ResponseEntity<ApiResponse<KakaoTranscoordResponse>> convertWGS84ToKTM(
+            @RequestParam String x,
+            @RequestParam String y
+    ) {
+        KakaoTranscoordResponse response = kakaoMapService.convertWGS84ToKTM(x, y);
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    @GetMapping("/convert/ktm-to-wgs84")
+    public ResponseEntity<ApiResponse<KakaoTranscoordResponse>> convertKTMToWGS84(
+            @RequestParam String x,
+            @RequestParam String y
+    ) {
+        KakaoTranscoordResponse response = kakaoMapService.convertKTMToWGS84(x, y);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 }
