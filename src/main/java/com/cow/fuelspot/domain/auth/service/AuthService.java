@@ -98,13 +98,21 @@ public class AuthService {
     // 비밀번호 재설정
     @Transactional
     public void resetPassword(PasswordResetRequest request) {
+        // 이메일 인증 코드 검증
         emailService.verifyCode(request.getEmail(), request.getCode());
+
+        // 새 비밀번호와 비밀번호 확인 일치 여부 검증
+        if (!request.getNewPassword().equals(request.getCheckNewPassword())) {
+            throw new CustomException(ErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
 
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // 비밀번호 변경
         member.changePassword(passwordEncoder.encode(request.getNewPassword()));
 
+        // 인증 코드 삭제
         emailService.deleteCode(request.getEmail());
     }
 

@@ -65,7 +65,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.onSuccess());
     }
 
-    // 비밀번호 재설정 API
+    // 비밀번호 찾기 API
     // POST /api/auth/password/resset
     @PostMapping("/password/reset")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid PasswordResetRequest request) {

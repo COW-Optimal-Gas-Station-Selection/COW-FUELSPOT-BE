@@ -22,23 +22,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberService {
 
-    // 생성자 주입
     private final MemberRepository memberRepository; // DB 접근 도구
     private final PasswordEncoder passwordEncoder; // 비밀번호 암호화 도구
 
     // 회원가입
-    // 이메일 중복 체크, 비밀번호 암호화, DB 저장
     @Transactional
     public Long signup(MemberSignupRequest request) {
+        // 이메일 중복 체크
         if (memberRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
-
+        
+        // 비밀번호와 비밀번호 확인 일치 여부 검증
+        if (!request.getPassword().equals(request.getCheckPassword())) {
+            throw new CustomException(ErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(request.getPassword());
+        
+        // DB 저장
         Member member = request.toEntity(encodedPassword);
-
-        // DB 저장 및 ID 반환
         Member savedMember = memberRepository.save(member);
+        
         return savedMember.getId();
     }
 
@@ -74,12 +79,17 @@ public class MemberService {
             throw new CustomException(ErrorCode.PASSWORD_MISMATCH);
         }
 
-        // 새 비밀번호와 기존 비밀번호 일치 여부 확인
+        // 새 비밀번호와 기존 비밀번호가 같은지 확인
         if (request.getCurrentPassword().equals(request.getNewPassword())) {
             throw new CustomException(ErrorCode.SAME_AS_OLD_PASSWORD);
         }
 
-        // 새 비밀번호 암호화 및 변경
+        // 새 비밀번호와 비밀번호 확인이 일치하는지 검증
+        if (!request.getNewPassword().equals(request.getCheckNewPassword())) {
+            throw new CustomException(ErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
+        // 암호화 및 변경
         String encodeNewPassword = passwordEncoder.encode(request.getNewPassword());
         member.changePassword(encodeNewPassword);
     }
