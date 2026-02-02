@@ -24,7 +24,6 @@ public class DetailResponse {
     private boolean isCarWash;
     private boolean isStore;
     private Map<FuelType, Integer> prices; // List에서 Map으로 변경
-
     private String tradeDate;
     private String tradeTime;
 

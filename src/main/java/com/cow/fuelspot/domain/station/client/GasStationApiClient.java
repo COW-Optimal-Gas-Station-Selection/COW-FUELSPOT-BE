@@ -1,9 +1,11 @@
 package com.cow.fuelspot.domain.station.client;
 
 import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.*;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
+import com.cow.fuelspot.global.common.code.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,18 +33,21 @@ public class GasStationApiClient {
         this.restTemplate = new RestTemplate();
         this.objectMapper = objectMapper;
     }
+
     //근처 주유소 조회
     public List<OpinetNearbyDto> getNearbyGasStations(NearbyRequest request, FuelType type) {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         return response.getOilList();
     }
+
     // 필터 조회
-    public List<OpinetNearbyDto> getStation(FilterRequest request) {
-        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, request.getFuelType().getCode());
+    public List<OpinetNearbyDto> getStation(FilterRequest request, FuelType type) {
+        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         return response.getOilList();
     }
+
     //세부정보 조회
     public OpinetDetailDto getDetailGasStation(String id) {
         URI url = UriComponentsBuilder.fromUriString(DETAIL_API_URL)
@@ -51,13 +56,16 @@ public class GasStationApiClient {
                 .queryParam("out", "json")
                 .build()
                 .toUri();
+
         OpinetResponse<OpinetDetailDto> response = fetchAndParse(url, OpinetDetailDto.class);
-        List<OpinetDetailDto> list = fetchAndParse(url, OpinetDetailDto.class).getOilList();
+        List<OpinetDetailDto> list = response.getOilList(); // 불필요한 중복 호출(fetchAndParse) 제거 및 response 재사용
+
         if (list == null || list.isEmpty()) {
-            throw new IllegalArgumentException("해당 아이디로 조회된 주유소 상세 정보가 없습니다.");
+            throw new IllegalArgumentException(ErrorCode.STATION_NOT_FOUND.getMessage());
         }
         return list.get(0);
     }
+
     //평균 조회
     public List<OpinetAverageDto> getAverageGasStation() {
         URI url = UriComponentsBuilder.fromUriString(AVERAGE_API_URL)
@@ -68,12 +76,13 @@ public class GasStationApiClient {
         OpinetResponse<OpinetAverageDto> response = fetchAndParse(url, OpinetAverageDto.class);
         return response.getOilList();
     }
+
     //시도별 조회
-    public List<OpinetSidoAverageDto> getsidoAverageGasStation(String sido) {
-        URI url = UriComponentsBuilder.fromUriString(AVERAGE_API_URL)
+    public List<OpinetSidoAverageDto> getsidoAverageGasStation(Sido sido) {
+        URI url = UriComponentsBuilder.fromUriString(AVERAGE_SIDO_API_URL)
                 .queryParam("out","json")
                 .queryParam("code", apiKey)
-                .queryParam("sido", sido)
+                .queryParam("sido", sido.getCode())
                 .build()
                 .toUri();
         OpinetResponse<OpinetSidoAverageDto> response = fetchAndParse(url, OpinetSidoAverageDto.class);
@@ -98,11 +107,11 @@ public class GasStationApiClient {
         try {
             responseBody = restTemplate.getForObject(url, String.class);
         } catch (org.springframework.web.client.RestClientException e) {
-            throw new IllegalStateException("주유소 서버 통신에 실패했습니다.");
+            throw new IllegalStateException(ErrorCode.STATION_API_COMMUNICATION_ERROR.getMessage());
         }
 
         if (responseBody == null || responseBody.isBlank()) {
-            throw new NoSuchElementException("조회된 정보가 없습니다.");
+            throw new NoSuchElementException(ErrorCode.STATION_NO_CONTENT.getMessage());
         }
 
         try {
@@ -110,11 +119,11 @@ public class GasStationApiClient {
                     objectMapper.getTypeFactory().constructParametricType(OpinetResponse.class, targetClass));
 
             if (result == null || result.getOilList() == null) {
-                throw new IllegalStateException("데이터 분석 중 오류가 발생했습니다.");
+                throw new IllegalStateException(ErrorCode.STATION_DATA_PARSE_ERROR.getMessage());
             }
             return result;
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new RuntimeException("정보 처리 과정에서 시스템 오류가 발생했습니다.");
+            throw new RuntimeException(ErrorCode.STATION_SYSTEM_ERROR.getMessage());
         }
     }
 }

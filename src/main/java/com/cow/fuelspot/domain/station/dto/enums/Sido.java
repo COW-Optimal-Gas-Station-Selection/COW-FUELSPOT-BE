@@ -1,8 +1,9 @@
 package com.cow.fuelspot.domain.station.dto.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 
-public enum Sido{
+public enum Sido {
     SEOUL("서울", "01"),
     GYEONGGI("경기", "02"),
     GANGWON("강원", "03"),
@@ -24,13 +25,16 @@ public enum Sido{
     }
 
     public String getName() { return name; }
-    public String getCode() { return code; }
 
-    public static Sido fromCode(String code) {
-        for (Sido sido : values()) {
-            if (sido.code.equals(code)) return sido;
-        }
-        throw new IllegalArgumentException("Unknown Sido Code: " + code);
+    @JsonValue
+    public String getCode() {
+        return code;
     }
 
+    public static Sido fromCode(String code) {
+        return Arrays.stream(Sido.values())
+                .filter(type -> type.code.equals(code))
+                .findFirst()
+                .orElse(null);
+    }
 }
