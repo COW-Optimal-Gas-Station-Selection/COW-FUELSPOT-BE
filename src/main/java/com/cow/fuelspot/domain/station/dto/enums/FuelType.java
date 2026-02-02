@@ -12,23 +12,29 @@ import java.util.Arrays;
 public enum FuelType {
     GASOLINE("B027", "휘발유"),
     DIESEL("D047", "경유"),
-    LPG("K015", "자동차부탄");
+    LPG("K015", "자동차부탄"),
+    PREMIUM_GASOLINE("B034","고급휘발유"),
+    KEROSENE("C004","실내등유");
 
     private final String code;
     private final String description;
 
     @JsonValue
-    public String getCode() {
-        return code;
+    public String toValue() {
+        return this.name(); // GASOLINE, DIESEL 등 enum 이름 반환
     }
 
     @JsonCreator
     public static FuelType fromCode(String code) {
         if (code == null) return null;
 
-        return Arrays.stream(FuelType.values())
-                .filter(type -> type.getCode().equals(code))
-                .findFirst()
-                .orElse(null);
+        try {
+            return FuelType.valueOf(code.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Arrays.stream(FuelType.values())
+                    .filter(type -> type.getCode().equals(code))
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 }

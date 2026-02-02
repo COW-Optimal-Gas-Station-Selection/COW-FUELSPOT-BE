@@ -36,3 +36,6 @@ opinet:
 
 jwt:
   secret: ${JWT_SECRET}
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}

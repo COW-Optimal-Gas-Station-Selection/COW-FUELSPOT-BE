@@ -1,17 +1,18 @@
 package com.cow.fuelspot.domain.auth.entity;
 
-import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
 // 리프레시 토큰 엔티티
 @Getter
+@Builder
 @NoArgsConstructor
-@Entity
-@Table(name = "refresh_token")
+@AllArgsConstructor
+@RedisHash(value = "refresh_token", timeToLive = 604800)
 public class RefreshToken {
 
     @Id
@@ -19,12 +20,6 @@ public class RefreshToken {
 
     // Refresh Token 값
     private String value;
-
-    @Builder
-    public RefreshToken(String email, String value) {
-        this.email = email;
-        this.value = value;
-    }
 
     // 토큰 교체 (Refresh Token Rotation)
     public void updateValue(String token) {

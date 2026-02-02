@@ -1,5 +1,6 @@
 package com.cow.fuelspot.domain.auth.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class TokenReissueRequest {
+    @NotBlank(message = "Access Token을 입력해주세요.")
     private String accessToken; // 만료된 기존 Access Token
+    @NotBlank(message = "Refresh Token을 입력해주세요.")
     private String refreshToken; // 검증을 위한 Refresh Token
 }

@@ -6,6 +6,8 @@ import com.cow.fuelspot.domain.member.repository.MemberRepository;
 import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
 import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
 import com.cow.fuelspot.domain.member.dto.PasswordChangeRequest;
+import com.cow.fuelspot.global.common.code.ErrorCode;
+import com.cow.fuelspot.global.common.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,29 +29,22 @@ public class MemberService {
     // 회원가입
     // 이메일 중복 체크, 비밀번호 암호화, DB 저장
     @Transactional
-    public void signup(MemberSignupRequest request) {
-        // 이메일 중복 검사
+    public Long signup(MemberSignupRequest request) {
         if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-        // DTO -> Entity 변환 (DTO 속 toEntity 메서드 사용)
         Member member = request.toEntity(encodedPassword);
 
-        // DB 저장
-        memberRepository.save(member);
+        // DB 저장 및 ID 반환
+        Member savedMember = memberRepository.save(member);
+        return savedMember.getId();
     }
 
     // 내 정보 조회
     public MemberInfoResponse getMyInfo(String email) {
-        // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다."));
-
-        // 응답용 DTO 변환해서 반환
+        Member member = findMemberByEmail(email);
         return MemberInfoResponse.from(member);
     }
 
@@ -57,46 +52,41 @@ public class MemberService {
     // @Transactional: 트랜잭션 종료 시 변경된 데이터를 감지하여 자동으로 DB 업데이트 (Dirty Checking: 변경 감지)
     @Transactional
     public MemberInfoResponse updateMyInfo(String email, MemberUpdateRequest request) {
-        // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다"));
-
-        // 정보 변경
+        Member member = findMemberByEmail(email);
         member.updateInfo(request.getNickname(), request.getFuelType(), request.getRadius());
-
-        // 수정된 정보를 DTO로 변환해서 반환
         return MemberInfoResponse.from(member);
     }
 
     // 회원 탈퇴
     @Transactional
     public void deleteMyAccount(String email) {
-        // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저가 없습니다"));
-
-        // DB에서 삭제
+        Member member = findMemberByEmail(email);
         memberRepository.delete(member);
     }
 
+    // 비밀번호 변경
     @Transactional
     public void changePassword(String email, PasswordChangeRequest request) {
-        // 회원 정보 조회
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 없습니다."));
+        Member member = findMemberByEmail(email);
 
         // 현재 비밀번호 일치 여부 확인
         if (!passwordEncoder.matches(request.getCurrentPassword(), member.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다");
+            throw new CustomException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         // 새 비밀번호와 기존 비밀번호 일치 여부 확인
         if (request.getCurrentPassword().equals(request.getNewPassword())) {
-            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다.");
+            throw new CustomException(ErrorCode.SAME_AS_OLD_PASSWORD);
         }
 
         // 새 비밀번호 암호화 및 변경
         String encodeNewPassword = passwordEncoder.encode(request.getNewPassword());
         member.changePassword(encodeNewPassword);
+    }
+
+    // 이메일로 회원 찾기 (공통 메서드)
+    private Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

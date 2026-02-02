@@ -2,6 +2,8 @@ package com.cow.fuelspot.global.config;
 
 import com.cow.fuelspot.global.jwt.JwtAuthenticationFilter;
 import com.cow.fuelspot.global.jwt.JwtTokenProvider;
+import com.cow.fuelspot.global.jwt.handler.JwtAccessDeniedHandler;
+import com.cow.fuelspot.global.jwt.handler.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +34,7 @@ public class SecurityConfig {
 
     // 보안 필터 체인 설정
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler) throws Exception{
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
@@ -43,6 +45,10 @@ public class SecurityConfig {
                 // 세션 사용 안 함 (JWT 사용하기 때문)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
+
                 // 출입 권한 설정 (어떤 주소로 들어올 때 검사를 할지 말지 정하는 곳)
                 .authorizeHttpRequests(auth -> auth
 
@@ -52,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/members").permitAll()
                         // 이메일 인증 및 비밀번호 찾기 API 허용
                         .requestMatchers("/api/auth/email/**", "/api/auth/password/**").permitAll()
+                        .requestMatchers("/api/map/**").permitAll()
 
                         // 스웨거 관련 주소 2개를 "프리패스"로 설정!
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
