@@ -106,6 +106,7 @@ jobs:
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
               -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }} \
               -e REDIS_HOST=fuelspot-redis \
               -e REDIS_PORT=6379 \
               ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
