@@ -1,10 +1,9 @@
 package com.cow.fuelspot.domain.station.dto.request;
 
-import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Builder
 @Getter

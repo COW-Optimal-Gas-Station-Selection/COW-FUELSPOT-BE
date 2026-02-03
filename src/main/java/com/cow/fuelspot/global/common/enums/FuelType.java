@@ -1,4 +1,4 @@
-package com.cow.fuelspot.domain.station.dto.enums;
+package com.cow.fuelspot.global.common.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -9,19 +9,20 @@ import java.util.Arrays;
 
 @Getter
 @RequiredArgsConstructor
+
 public enum FuelType {
     GASOLINE("B027", "휘발유"),
     DIESEL("D047", "경유"),
     LPG("K015", "자동차부탄"),
-    PREMIUM_GASOLINE("B034","고급휘발유"),
-    KEROSENE("C004","실내등유");
+    PREMIUM_GASOLINE("B034", "고급휘발유"),
+    KEROSENE("C004", "실내등유");
 
     private final String code;
     private final String description;
 
     @JsonValue
     public String toValue() {
-        return this.name(); // GASOLINE, DIESEL 등 enum 이름 반환
+        return this.name();
     }
 
     @JsonCreator
@@ -37,4 +38,6 @@ public enum FuelType {
                     .orElse(null);
         }
     }
+
+
 }

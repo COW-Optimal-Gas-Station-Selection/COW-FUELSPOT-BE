@@ -44,8 +44,7 @@ public class AuthController {
     // POST /api/auth/logout
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails) {
-        // @AuthenticationPrincipal: 현재 로그인한 사용자의 정보를 가져옴
-        authService.logout(userDetails.getUsername()); // 서비스 호출해서 DB 삭제
+        authService.logout(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.onSuccess());
     }
 

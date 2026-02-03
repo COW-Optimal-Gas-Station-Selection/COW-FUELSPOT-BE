@@ -9,18 +9,12 @@ import com.cow.fuelspot.global.common.dto.ApiResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
 // 회원 컨트롤러
-// 회원가입, 내 정보 조회 등 회원과 관련된 요청 처리
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor // 의존성 주입

@@ -24,9 +24,8 @@ public class GlobalExceptionHandler {
     // 커스텀 예외 처리
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<Object>> handleCustomException(CustomException e) {
-        log.warn("Business Exception: {}", e.getErrorCode().getMessage()); // 로그 기록
+        log.warn("Business Exception: {}", e.getErrorCode().getMessage());
 
-        // HTTP 상태 코드와 데이터 모두 전송
         return ResponseEntity
                 .status(e.getErrorCode().getHttpStatus())
                 .body(ApiResponse.onFailure(e.getErrorCode()));
@@ -38,7 +37,6 @@ public class GlobalExceptionHandler {
         // 에러가 여러 개일 수 있으니 Map에 담음
         Map<String, String> errors = new HashMap<>();
 
-        // 발생한 모든 에러 Map에 삽입
         e.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField(); // 틀린 필드명
             String errorMessage = error.getDefaultMessage(); // 에러 메세지

@@ -1,6 +1,6 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
-import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OilPriceDto;
 import lombok.Builder;

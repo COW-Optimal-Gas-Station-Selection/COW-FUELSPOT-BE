@@ -1,7 +1,7 @@
 package com.cow.fuelspot.domain.member.dto;
 
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.member.entity.Member;
-import com.cow.fuelspot.domain.member.entity.FuelType;
 import lombok.Builder;
 import lombok.Getter;
 
