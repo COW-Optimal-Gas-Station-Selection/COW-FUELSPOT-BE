@@ -40,20 +40,15 @@ public class AuthService {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
-        // 실제 검증 (비밀번호 체크)
-        // authenticate()가 실행될 때 CustomUserDetailsService의 loadUserByUsername이 실행됨
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        // 인증 정보를 기반으로 JWT 토큰 생성 (Access + Refresh)
         TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authentication);
 
-            // RefreshToken 저장
         RefreshToken refreshToken = RefreshToken.builder()
                 .email(authentication.getName())
                 .value(tokenDto.getRefreshToken())
                 .build();
         refreshTokenRepository.save(refreshToken);
 
-        // 응답 객체 생성
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -98,10 +93,8 @@ public class AuthService {
     // 비밀번호 재설정
     @Transactional
     public void resetPassword(PasswordResetRequest request) {
-        // 이메일 인증 코드 검증
         emailService.verifyCode(request.getEmail(), request.getCode());
 
-        // 새 비밀번호와 비밀번호 확인 일치 여부 검증
         if (!request.getNewPassword().equals(request.getCheckNewPassword())) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
@@ -109,10 +102,8 @@ public class AuthService {
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 비밀번호 변경
         member.changePassword(passwordEncoder.encode(request.getNewPassword()));
 
-        // 인증 코드 삭제
         emailService.deleteCode(request.getEmail());
     }
 

@@ -1,6 +1,6 @@
 package com.cow.fuelspot.domain.station.client;
 
-import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.*;
 import com.cow.fuelspot.domain.station.dto.request.FilterRequest;

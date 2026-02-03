@@ -1,6 +1,6 @@
 package com.cow.fuelspot.domain.member.dto;
 
-import com.cow.fuelspot.domain.member.entity.FuelType;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.member.entity.Member;
 import jakarta.validation.constraints.*;
 import lombok.Getter;

@@ -1,5 +1,6 @@
 package com.cow.fuelspot.domain.member.entity;
 
+import com.cow.fuelspot.global.common.enums.FuelType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -45,9 +46,7 @@ public class Member {
     }
 
     // 비즈니스 로직 (정보 수정)
-    // Setter를 사용하면 사용한 의도를 파악하기 어렵고, 일관성을 유지하기 힘들기 때문에 사용
     public void updateInfo(String nickname, FuelType fuelType, Integer radius) {
-        // null이 들어오면 수정하지 않고 기존 값 유지
         if (nickname != null) this.nickname = nickname;
         if (fuelType != null) this.fuelType = fuelType;
         if (radius != null) this.radius = radius;

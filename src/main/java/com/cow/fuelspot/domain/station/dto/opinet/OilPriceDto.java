@@ -1,6 +1,6 @@
 package com.cow.fuelspot.domain.station.dto.opinet;
 
-import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

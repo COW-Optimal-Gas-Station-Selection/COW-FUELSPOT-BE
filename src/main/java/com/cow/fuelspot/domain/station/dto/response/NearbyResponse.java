@@ -1,6 +1,6 @@
 package com.cow.fuelspot.domain.station.dto.response;
 
-import com.cow.fuelspot.domain.station.dto.enums.FuelType;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import lombok.*;
 
 import java.util.Map;
