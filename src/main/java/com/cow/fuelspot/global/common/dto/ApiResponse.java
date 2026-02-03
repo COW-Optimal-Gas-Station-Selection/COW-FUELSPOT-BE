@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 // 공통 응답 포맷
-// 성공하든 실패하든 항상 {isSuccess. message, result} 구조 응닫
+// 성공하든 실패하든 항상 {isSuccess, message, result} 구조 응닫
 @Getter
 @AllArgsConstructor
 @JsonPropertyOrder({"isSuccess", "message", "result"}) // 필드 순서 지정

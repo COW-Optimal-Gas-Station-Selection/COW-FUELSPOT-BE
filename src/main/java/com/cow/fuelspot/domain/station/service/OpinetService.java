@@ -1,11 +1,11 @@
 package com.cow.fuelspot.domain.station.service;
 
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.Repository.UserRepository;
 import com.cow.fuelspot.domain.station.client.GasStationApiClient;
 import com.cow.fuelspot.domain.station.component.FuelCalculator;
 import com.cow.fuelspot.domain.station.component.OpinetMapper;
 import com.cow.fuelspot.domain.station.component.StationFilter;
-import com.cow.fuelspot.domain.station.dto.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
@@ -40,7 +40,7 @@ public class OpinetService {
             //유저 정보(선호유종) 조회
             if(authentication!=null) {
                 String userId = authentication.getName();
-                fuelType = memberRepository.findFuelTypeByMemberId(userId);;
+                fuelType = memberRepository.findFuelTypeByMemberId(userId);
             }
             //기본값 설정(가솔린)
             if (fuelType==null){
