@@ -1,7 +1,6 @@
 package com.cow.fuelspot.domain.station.controller;
 
 import com.cow.fuelspot.domain.station.dto.enums.Sido;
-import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
@@ -43,14 +42,6 @@ public class GasStationController {
             @PathVariable String stationId) {
         DetailResponse detail = opinetService.getDetailGasStation(stationId);
         return ApiResponse.onSuccess(detail);
-    }
-
-    @Operation(summary = "필터 조회", description = "필터 조건에 맞는 주유소를 조회합니다.")
-    @GetMapping("/filter")
-    public ApiResponse<List<NearbyResponse>> getStationDetail(@Valid FilterRequest request,
-                                                              Authentication authentication) {
-        List<NearbyResponse> stations = opinetService.getFilteredStations(request, authentication);
-        return ApiResponse.onSuccess(stations);
     }
 
     @Operation(summary = "전국 평균 가격 조회", description = "전국 주유소의 평균 가격을 조회합니다.")

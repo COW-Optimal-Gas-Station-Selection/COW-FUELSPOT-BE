@@ -1,20 +1,34 @@
 package com.cow.fuelspot.domain.station.component;
 
+import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
+import com.cow.fuelspot.domain.map.service.KakaoMapService;
 import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.opinet.*;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
 import com.cow.fuelspot.domain.station.dto.response.NearbyResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 //매핑을 위한 컴포넌트
 @Component
+@RequiredArgsConstructor
 public class OpinetMapper {
+    private final KakaoMapService kakaoMapService;
 
     // 상세 조회용 변환
     public DetailResponse toDetailResponse(OpinetDetailDto dto) {
         TradeTimeInfo timeInfo = extractMinTradeTime(dto.getOilPrices());
+
+        //오피넷용->카카오용
+        KakaoTranscoordResponse response = kakaoMapService.convertKTMToWGS84(
+                String.valueOf(dto.getLon()),
+                String.valueOf(dto.getLat())
+        );
+        Double lon = Double.valueOf(response.getDocuments().get(0).getX());
+        Double lat = Double.valueOf(response.getDocuments().get(0).getY());
+
 
         return DetailResponse.builder()
                 .id(dto.getId())
@@ -22,8 +36,8 @@ public class OpinetMapper {
                 .brand(dto.getBrand())
                 .address(dto.getAddressNew())
                 .tel(dto.getTel())
-                .lat(dto.getLat())
-                .lon(dto.getLon())
+                .lat(lat)
+                .lon(lon)
                 .isCarWash("Y".equals(dto.getCarWashYn()))
                 .isStore("Y".equals(dto.getCvsYn()))
                 .prices(extractPricesAsMap(dto.getOilPrices()))
@@ -34,32 +48,30 @@ public class OpinetMapper {
 
     // 목록/필터 조회용 변환 (상세 데이터 기반)
     public NearbyResponse toNearbyResponse(OpinetNearbyDto nearby, OpinetDetailDto detail) {
+        TradeTimeInfo timeInfo = extractMinTradeTime(detail.getOilPrices());
+        //오피넷용->카카오용
+        KakaoTranscoordResponse response = kakaoMapService.convertKTMToWGS84(
+                String.valueOf(detail.getLon()),
+                String.valueOf(detail.getLat())
+        );
+        Double lon = Double.valueOf(response.getDocuments().get(0).getX());
+        Double lat = Double.valueOf(response.getDocuments().get(0).getY());
         return NearbyResponse.builder()
                 .id(nearby.getId())
                 .name(nearby.getName())
                 .brand(nearby.getBrand())
                 .distance(nearby.getDistance())
-                .lat(nearby.getLat())
-                .lon(nearby.getLon())
+                .lat(lat)
+                .lon(lon)
                 .prices(extractPricesAsMap(detail.getOilPrices()))
+                .address(detail.getAddressNew())
+                .tel(detail.getTel())
+                .isCarWash("Y".equals(detail.getCarWashYn()))
+                .tradeDate(timeInfo.date)
+                .tradeTime(timeInfo.time())
                 .build();
     }
 
-    // 근처 주유소 기본 변환 (기본 데이터 기반)
-    public NearbyResponse toNearbyResponse(OpinetNearbyDto dto, FuelType type, Integer price) {
-        Map<FuelType, Integer> prices = new HashMap<>();
-        prices.put(type, price);
-
-        return NearbyResponse.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .brand(dto.getBrand())
-                .distance(dto.getDistance())
-                .lat(dto.getLat())
-                .lon(dto.getLon())
-                .prices(prices)
-                .build();
-    }
 
     // Map 형태로 가격 추출 (DetailResponse, NearbyResponse 공통 사용)
     private Map<FuelType, Integer> extractPricesAsMap(List<OilPriceDto> oilPrices) {
@@ -100,7 +112,6 @@ public class OpinetMapper {
     }
 
 
-
     public Double extractWeeklyChange(List<OpinetAverageDto> dtos, FuelType fuelType) {
         return dtos.stream()
                 .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
@@ -116,7 +127,6 @@ public class OpinetMapper {
                 .findFirst()
                 .orElse(0);
     }
-
 
 
     public Double extractSidoWeeklyChange(List<OpinetSidoAverageDto> dtos, FuelType fuelType) {

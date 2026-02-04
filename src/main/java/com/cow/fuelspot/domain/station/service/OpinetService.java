@@ -1,5 +1,7 @@
 package com.cow.fuelspot.domain.station.service;
 
+import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
+import com.cow.fuelspot.domain.map.service.KakaoMapService;
 import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.Repository.UserRepository;
 import com.cow.fuelspot.domain.station.client.GasStationApiClient;
@@ -11,7 +13,6 @@ import com.cow.fuelspot.domain.station.dto.opinet.OpinetAverageDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetNearbyDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetDetailDto;
 import com.cow.fuelspot.domain.station.dto.opinet.OpinetSidoAverageDto;
-import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.domain.station.dto.response.AverageStationResponse;
 import com.cow.fuelspot.domain.station.dto.response.DetailResponse;
@@ -32,53 +33,19 @@ public class OpinetService {
     private final StationFilter stationFilter;
     private final OpinetMapper opinetMapper;
     private final UserRepository memberRepository;
+    private final KakaoMapService kakaoMapService;
 
     // 근처 주유소 조회(우선순위 request FuelType<-로그인 유저 타입<-기본값(가솔린))
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request, Authentication authentication) {
-        FuelType fuelType = null;
-        if(request.getFuelType()==null){
-            //유저 정보(선호유종) 조회
-            if(authentication!=null) {
-                String userId = authentication.getName();
-                fuelType = memberRepository.findFuelTypeByMemberId(userId);
-            }
-            //기본값 설정(가솔린)
-            if (fuelType==null){
-                fuelType=FuelType.GASOLINE;
-            }
-        }else{
-            fuelType = request.getFuelType();
+        //좌표: 카카오->오피넷
+        KakaoTranscoordResponse ktmResponse = kakaoMapService.convertWGS84ToKTM(
+                String.valueOf(request.getLon()),
+                String.valueOf(request.getLat())
+        );
+        if (ktmResponse != null && !ktmResponse.getDocuments().isEmpty()) {
+            request.setLat(Double.valueOf(ktmResponse.getDocuments().get(0).getX()));
+            request.setLon(Double.valueOf(ktmResponse.getDocuments().get(0).getY()));
         }
-        Map<String, NearbyResponse> mergeMap = new LinkedHashMap<>();
-
-        for (FuelType type : FuelType.values()) {
-            List<OpinetNearbyDto> dtos = gasStationApiClient.getNearbyGasStations(request, type);
-            if (dtos != null) {
-                for (OpinetNearbyDto dto : dtos) {
-                    //없는 경우
-                    if (mergeMap.containsKey(dto.getId())) {
-                        mergeMap.get(dto.getId()).getPrices().put(type, dto.getPrice());
-                    }//있는 경우
-                    else {
-                        mergeMap.put(dto.getId(), opinetMapper.toNearbyResponse(dto, type, dto.getPrice()));
-                    }
-                }
-            }
-        }
-        FuelType finalFuelType = fuelType;
-        return mergeMap.values().stream()
-                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, finalFuelType)))
-                .collect(Collectors.toList());
-    }
-
-    // 주유소 상세 조회
-    public DetailResponse getDetailGasStation(String id) {
-        OpinetDetailDto detailDto = gasStationApiClient.getDetailGasStation(id);
-        return opinetMapper.toDetailResponse(detailDto);
-    }
-
-    // 필터 기반 주유소 조회(우선순위 request FuelType<-로그인 유저 타입<-기본값(가솔린))
-    public List<NearbyResponse> getFilteredStations(FilterRequest request, Authentication authentication) {
         FuelType fuelType = null;
         if(request.getFuelType()==null){
             //유저 정보(선호유종) 조회
@@ -107,6 +74,13 @@ public class OpinetService {
                 .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, finalFuelType)))
                 .collect(Collectors.toList());
     }
+
+    // 주유소 상세 조회
+    public DetailResponse getDetailGasStation(String id) {
+        OpinetDetailDto detailDto = gasStationApiClient.getDetailGasStation(id);
+        return opinetMapper.toDetailResponse(detailDto);
+    }
+
 
     // 전국 평균 유가 조회
     public AverageStationResponse getAverageStation() {

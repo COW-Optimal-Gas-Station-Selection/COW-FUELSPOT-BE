@@ -64,11 +64,11 @@ public class OpinetDetailDto {
     private String cvsYn;
 
     @JsonProperty("lat")
-    @JsonAlias("GIS_X_COOR")
+    @JsonAlias("GIS_Y_COOR")
     private Double lat;
 
     @JsonProperty("lon")
-    @JsonAlias("GIS_Y_COOR")
+    @JsonAlias("GIS_X_COOR")
     private Double lon;
 
     @JsonProperty("oilPrices")

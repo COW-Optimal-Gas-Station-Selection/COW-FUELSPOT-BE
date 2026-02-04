@@ -14,10 +14,13 @@ public class NearbyResponse {
     private String id;
     private String name;
     private String brand;
-
     private Map<FuelType, Integer> prices;
-
     private Integer distance;
     private Double lat;
     private Double lon;
+    private String address;
+    private String tel;
+    private boolean isCarWash;
+    private String tradeDate;
+    private String tradeTime;
 }
