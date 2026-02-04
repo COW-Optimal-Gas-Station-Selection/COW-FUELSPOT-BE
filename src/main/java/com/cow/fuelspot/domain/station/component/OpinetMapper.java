@@ -26,8 +26,8 @@ public class OpinetMapper {
                 String.valueOf(dto.getLon()),
                 String.valueOf(dto.getLat())
         );
-        Double lat = Double.valueOf(response.getDocuments().get(0).getX());
-        Double lon = Double.valueOf(response.getDocuments().get(0).getY());
+        Double lon = Double.valueOf(response.getDocuments().get(0).getX());
+        Double lat = Double.valueOf(response.getDocuments().get(0).getY());
 
 
         return DetailResponse.builder()
@@ -48,13 +48,14 @@ public class OpinetMapper {
 
     // 목록/필터 조회용 변환 (상세 데이터 기반)
     public NearbyResponse toNearbyResponse(OpinetNearbyDto nearby, OpinetDetailDto detail) {
+        TradeTimeInfo timeInfo = extractMinTradeTime(detail.getOilPrices());
         //오피넷용->카카오용
         KakaoTranscoordResponse response = kakaoMapService.convertKTMToWGS84(
                 String.valueOf(detail.getLon()),
                 String.valueOf(detail.getLat())
         );
-        Double lat = Double.valueOf(response.getDocuments().get(0).getX());
-        Double lon = Double.valueOf(response.getDocuments().get(0).getY());
+        Double lon = Double.valueOf(response.getDocuments().get(0).getX());
+        Double lat = Double.valueOf(response.getDocuments().get(0).getY());
         return NearbyResponse.builder()
                 .id(nearby.getId())
                 .name(nearby.getName())
@@ -63,34 +64,14 @@ public class OpinetMapper {
                 .lat(lat)
                 .lon(lon)
                 .prices(extractPricesAsMap(detail.getOilPrices()))
+                .address(detail.getAddressNew())
+                .tel(detail.getTel())
+                .isCarWash("Y".equals(detail.getCarWashYn()))
+                .tradeDate(timeInfo.date)
+                .tradeTime(timeInfo.time())
                 .build();
     }
 
-    // 근처 주유소 기본 변환 (기본 데이터 기반)
-    public NearbyResponse toNearbyResponse(OpinetNearbyDto dto, FuelType type, Integer price) {
-        Map<FuelType, Integer> prices = new HashMap<>();
-        prices.put(type, price);
-        //오피넷용->카카오용
-        KakaoTranscoordResponse response = kakaoMapService.convertKTMToWGS84(
-                String.valueOf(dto.getLon()),
-                String.valueOf(dto.getLat())
-        );
-        System.out.println("mapper");
-        System.out.println(response.getDocuments().get(0).getX());
-        System.out.println(response.getDocuments().get(0).getY());
-        Double lat = Double.valueOf(response.getDocuments().get(0).getX());
-        Double lon = Double.valueOf(response.getDocuments().get(0).getY());
-
-        return NearbyResponse.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .brand(dto.getBrand())
-                .distance(dto.getDistance())
-                .lat(lat)
-                .lon(lon)
-                .prices(prices)
-                .build();
-    }
 
     // Map 형태로 가격 추출 (DetailResponse, NearbyResponse 공통 사용)
     private Map<FuelType, Integer> extractPricesAsMap(List<OilPriceDto> oilPrices) {
@@ -131,7 +112,6 @@ public class OpinetMapper {
     }
 
 
-
     public Double extractWeeklyChange(List<OpinetAverageDto> dtos, FuelType fuelType) {
         return dtos.stream()
                 .filter(dto -> dto.getProdCd().equals(fuelType.getCode()))
@@ -147,7 +127,6 @@ public class OpinetMapper {
                 .findFirst()
                 .orElse(0);
     }
-
 
 
     public Double extractSidoWeeklyChange(List<OpinetSidoAverageDto> dtos, FuelType fuelType) {

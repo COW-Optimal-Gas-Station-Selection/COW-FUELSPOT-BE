@@ -3,7 +3,6 @@ package com.cow.fuelspot.domain.station.client;
 import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.dto.enums.Sido;
 import com.cow.fuelspot.domain.station.dto.opinet.*;
-import com.cow.fuelspot.domain.station.dto.request.FilterRequest;
 import com.cow.fuelspot.domain.station.dto.request.NearbyRequest;
 import com.cow.fuelspot.global.common.code.ErrorCode;
 import com.cow.fuelspot.global.common.exception.CustomException;
@@ -38,13 +37,12 @@ public class GasStationApiClient {
     // 근처 주유소 조회
     public List<OpinetNearbyDto> getNearbyGasStations(NearbyRequest request, FuelType type) {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
-        System.out.println("url: " + url);
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         return response.getOilList();
     }
 
     // 필터 조회
-    public List<OpinetNearbyDto> getStation(FilterRequest request, FuelType type) {
+    public List<OpinetNearbyDto> getStation(NearbyRequest request, FuelType type) {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         return response.getOilList();
