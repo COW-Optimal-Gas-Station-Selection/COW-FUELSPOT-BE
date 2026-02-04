@@ -38,6 +38,7 @@ public class GasStationApiClient {
     // 근처 주유소 조회
     public List<OpinetNearbyDto> getNearbyGasStations(NearbyRequest request, FuelType type) {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
+        System.out.println("url: " + url);
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         return response.getOilList();
     }

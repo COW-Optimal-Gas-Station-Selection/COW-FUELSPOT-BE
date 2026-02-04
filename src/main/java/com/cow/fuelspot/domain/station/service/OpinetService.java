@@ -1,5 +1,7 @@
 package com.cow.fuelspot.domain.station.service;
 
+import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
+import com.cow.fuelspot.domain.map.service.KakaoMapService;
 import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.domain.station.Repository.UserRepository;
 import com.cow.fuelspot.domain.station.client.GasStationApiClient;
@@ -32,10 +34,23 @@ public class OpinetService {
     private final StationFilter stationFilter;
     private final OpinetMapper opinetMapper;
     private final UserRepository memberRepository;
+    private final KakaoMapService kakaoMapService;
 
     // 근처 주유소 조회(우선순위 request FuelType<-로그인 유저 타입<-기본값(가솔린))
     public List<NearbyResponse> getNearbyGasStations(NearbyRequest request, Authentication authentication) {
         FuelType fuelType = null;
+        //좌표: 카카오->표준
+        KakaoTranscoordResponse ktmResponse = kakaoMapService.convertWGS84ToKTM(
+                String.valueOf(request.getLon()),
+                String.valueOf(request.getLat())
+        );
+
+        System.out.println(ktmResponse.getDocuments().get(0).getX());
+        System.out.println(ktmResponse.getDocuments().get(0).getY());
+        if (ktmResponse != null && !ktmResponse.getDocuments().isEmpty()) {
+            request.setLat(Double.valueOf(ktmResponse.getDocuments().get(0).getX()));
+            request.setLon(Double.valueOf(ktmResponse.getDocuments().get(0).getY()));
+        }
         if(request.getFuelType()==null){
             //유저 정보(선호유종) 조회
             if(authentication!=null) {

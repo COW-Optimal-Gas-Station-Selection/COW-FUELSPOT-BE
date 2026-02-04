@@ -85,7 +85,7 @@ public class KakaoMapService {
         // 못 찾으면 null 반환
         return null;
     }
-
+//카카오->오피넷
     public KakaoTranscoordResponse convertWGS84ToKTM(String x, String y) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
                 .queryParam("x", x)
@@ -96,7 +96,7 @@ public class KakaoMapService {
 
         return callKakaoApi(uri, KakaoTranscoordResponse.class);
     }
-
+    //
     public KakaoTranscoordResponse convertKTMToWGS84(String x, String y) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
                 .queryParam("x", x)

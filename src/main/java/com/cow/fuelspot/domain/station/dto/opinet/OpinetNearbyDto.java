@@ -36,10 +36,10 @@ public class OpinetNearbyDto {
     private Integer distance;
 
     @JsonProperty("lat")
-    @JsonAlias("GIS_X_COOR")
+    @JsonAlias("GIS_Y_COOR")
     private Double lat;
 
     @JsonProperty("lon")
-    @JsonAlias("GIS_Y_COOR")
+    @JsonAlias("GIS_X_COOR")
     private Double lon;
 }
