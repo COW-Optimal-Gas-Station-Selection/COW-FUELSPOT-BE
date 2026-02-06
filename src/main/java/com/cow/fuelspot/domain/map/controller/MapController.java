@@ -1,6 +1,5 @@
 package com.cow.fuelspot.domain.map.controller;
 
-import com.cow.fuelspot.domain.map.dto.KakaoAddressResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoDirectionsResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoSearchResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
@@ -16,10 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/map")
 @RequiredArgsConstructor
-public class MapController {
+public class MapController implements MapControllerDocs{
 
     private final KakaoMapService kakaoMapService;
 
+    @Override
     @GetMapping("/direction")
     public ResponseEntity<ApiResponse<KakaoDirectionsResponse>> findRoute(
             @RequestParam String origin,
@@ -29,12 +29,14 @@ public class MapController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
+    @Override
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<KakaoSearchResponse>> searchPlace(@RequestParam String keyword) {
         KakaoSearchResponse response = kakaoMapService.searchPlaces(keyword);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
+    @Override
     @GetMapping("/address")
     public ResponseEntity<ApiResponse<String>> convertCoordsToAddress(
             @RequestParam String x,
@@ -44,6 +46,7 @@ public class MapController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
+    @Override
     @GetMapping("/convert/wgs84-to-ktm")
     public ResponseEntity<ApiResponse<KakaoTranscoordResponse>> convertWGS84ToKTM(
             @RequestParam String x,
@@ -53,6 +56,7 @@ public class MapController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
+    @Override
     @GetMapping("/convert/ktm-to-wgs84")
     public ResponseEntity<ApiResponse<KakaoTranscoordResponse>> convertKTMToWGS84(
             @RequestParam String x,

@@ -19,13 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
     private final AuthService authService;
     private final EmailService emailService;
 
     // 로그인 API
     // POST /api/auth/login
+    @Override
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest request) {
         LoginResponse response = authService.login(request);
@@ -34,6 +35,7 @@ public class AuthController {
 
     // 토큰 재발급 API
     // POST /api/auth/reissue
+    @Override
     @PostMapping("/reissue")
     public ResponseEntity<ApiResponse<TokenDto>> reissue(@RequestBody @Valid TokenReissueRequest request) {
         TokenDto response = authService.reissue(request);
@@ -42,6 +44,7 @@ public class AuthController {
 
     // 로그아웃 API
     // POST /api/auth/logout
+    @Override
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails) {
         authService.logout(userDetails.getUsername());
@@ -50,6 +53,7 @@ public class AuthController {
 
     // 인증 코드 발송 API
     // POST /api/auth/email/send
+    @Override
     @PostMapping("/email/send")
     public ResponseEntity<ApiResponse<Void>> sendVerificationCode(@RequestBody @Valid EmailRequest request) {
         emailService.sendVerificationCode(request);
@@ -58,6 +62,7 @@ public class AuthController {
 
     // 인증 코드 검증 API
     // POST /api/auth/email/verify
+    @Override
     @PostMapping("/email/verify")
     public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody @Valid EmailVerificationRequest request) {
         emailService.verifyCode(request.getEmail(), request.getCode());
@@ -65,7 +70,8 @@ public class AuthController {
     }
 
     // 비밀번호 찾기 API
-    // POST /api/auth/password/resset
+    // POST /api/auth/password/reset
+    @Override
     @PostMapping("/password/reset")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid PasswordResetRequest request) {
         authService.resetPassword(request);
