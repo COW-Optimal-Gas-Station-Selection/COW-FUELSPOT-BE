@@ -1,13 +1,19 @@
 package com.cow.fuelspot.domain.favorite.service;
 
+import com.cow.fuelspot.domain.favorite.dto.FavoriteRequest;
 import com.cow.fuelspot.domain.favorite.dto.FavoriteResponse;
 import com.cow.fuelspot.domain.favorite.entity.Favorite;
 import com.cow.fuelspot.domain.favorite.repository.FavoriteRepository;
 import com.cow.fuelspot.domain.member.entity.Member;
 import com.cow.fuelspot.domain.member.repository.MemberRepository;
+import com.cow.fuelspot.global.common.code.ErrorCode;
+import com.cow.fuelspot.global.common.exception.CustomException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +27,10 @@ public class FavoriteService {
     public FavoriteResponse addFavorite(String email, String stationId) {
 
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (favoriteRepository.existsByMemberAndStationId(member, stationId)) {
-            throw new IllegalStateException("이미 즐겨찾기 된 주유소입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_FAVORITE);
         }
 
         Favorite favorite = Favorite.builder()
@@ -40,8 +46,19 @@ public class FavoriteService {
     @Transactional
     public void removeFavorite(String email, String stationId) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
         favoriteRepository.deleteByMemberAndStationId(member, stationId);
+    }
+
+    public List<FavoriteResponse> getFavorites(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return favoriteRepository.findAllByMember(member)
+                .stream()
+                .map(FavoriteResponse::from)
+                .collect(Collectors.toList());
     }
 
     public long getFavoriteCount(String stationId) {
