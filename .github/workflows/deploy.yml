@@ -22,13 +22,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # 빌드 추가 (jar 파일 생성이 필요할 수 있으므로 추가)
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
       # 1. AWS 권한 설정 (보안 그룹 조작용)
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2 # 서울 리전
+          aws-region: ap-northeast-2
 
       # 2. 현재 깃허브 액션 러너의 공인 IP 가져오기
       - name: Get Github Action IP
@@ -51,7 +55,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
+          tags: jonghyeok03/fuelspot-app:latest
 
       # 4. EC2에 접속해서 배포
       - name: Deploy to EC2
@@ -61,27 +65,22 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            # 도커 네트워크 생성
+            DOCKER_USER="jonghyeok03"
+            
+            # 2. 도커 네트워크 생성
             docker network create fuelspot-net || true
 
-            # Redis 실행
+            # 3. Redis 실행
             if ! docker ps -a --format '{{.Names}}' | grep -q "^fuelspot-redis$"; then
-              docker run -d --name fuelspot-redis \
-                --network fuelspot-net \
-                -p 6379:6379 \
-                --restart unless-stopped \
-                redis:alpine
+              docker run -d --name fuelspot-redis --network fuelspot-net -p 6379:6379 --restart unless-stopped redis:alpine
             fi
 
-            # MySQL 실행
+            # 4. MySQL 실행
             if ! docker ps -a --format '{{.Names}}' | grep -q "^fuelspot-db$"; then
-              docker run -d --name fuelspot-db \
-                --network fuelspot-net \
-                -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              docker run -d --name fuelspot-db --network fuelspot-net \
+                -e MYSQL_ROOT_PASSWORD="${{ secrets.DB_PASSWORD }}" \
                 -e MYSQL_DATABASE=fuelspot_db \
-                -e TZ=Asia/Seoul \
-                --restart unless-stopped \
-                mysql:8.0
+                --restart unless-stopped mysql:8.0
             fi
             
             docker start fuelspot-db fuelspot-redis || true
@@ -91,9 +90,6 @@ jobs:
 
             # 기존 앱 삭제
             docker rm -f fuelspot-app || true
-            
-            # 최신 앱 이미지 다운로드
-            DOCKER_USER=$(echo "${{ secrets.DOCKER_USERNAME }}" | tr '[:upper:]' '[:lower:]')
             docker pull $DOCKER_USER/fuelspot-app:latest
             
             # 앱 실행
@@ -104,15 +100,15 @@ jobs:
               --restart unless-stopped \
               -e TZ=Asia/Seoul \
               -e SPRING_DATASOURCE_URL="jdbc:mysql://fuelspot-db:3306/fuelspot_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" \
-              -e SPRING_DATASOURCE_USERNAME=root \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e OPINET_API_KEY=${{ secrets.OPINET_API_KEY }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
-              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
-              -e KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }} \
-              -e REDIS_HOST=fuelspot-redis \
+              -e SPRING_DATASOURCE_USERNAME="root" \
+              -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e OPINET_API_KEY="${{ secrets.OPINET_API_KEY }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}" \
+              -e MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
+              -e KAKAO_REST_API_KEY="${{ secrets.KAKAO_REST_API_KEY }}" \
+              -e REDIS_HOST="fuelspot-redis" \
               -e REDIS_PORT=6379 \
               $DOCKER_USER/fuelspot-app:latest
             
