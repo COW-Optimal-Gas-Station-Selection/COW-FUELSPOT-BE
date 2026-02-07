@@ -114,7 +114,7 @@ jobs:
               -e KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }} \
               -e REDIS_HOST=fuelspot-redis \
               -e REDIS_PORT=6379 \
-              ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
+              $DOCKER_USER/fuelspot-app:latest         
             
             docker image prune -f
 
