@@ -64,39 +64,44 @@ jobs:
             # 도커 네트워크 생성
             docker network create fuelspot-net || true
 
-            # Redis 실행 
-            if ! docker ps | grep -q "fuelspot-redis"; then
+            # Redis 실행
+            if ! docker ps -a --format '{{.Names}}' | grep -q "^fuelspot-redis$"; then
               docker run -d --name fuelspot-redis \
                 --network fuelspot-net \
                 -p 6379:6379 \
+                --restart unless-stopped \
                 redis:alpine
             fi
 
             # MySQL 실행
-            if ! docker ps | grep -q "fuelspot_db"; then
+            if ! docker ps -a --format '{{.Names}}' | grep -q "^fuelspot-db$"; then
               docker run -d --name fuelspot-db \
                 --network fuelspot-net \
                 -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
                 -e MYSQL_DATABASE=fuelspot_db \
                 -e TZ=Asia/Seoul \
+                --restart unless-stopped \
                 mysql:8.0
             fi
+            
+            docker start fuelspot-db fuelspot-redis || true
             
             # DB 켜질 때까지 10초 대기
             sleep 10
 
             # 기존 앱 삭제
-            docker stop fuelspot-app || true
-            docker rm fuelspot-app || true
+            docker rm -f fuelspot-app || true
             
             # 최신 앱 이미지 다운로드
-            docker pull ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
+            DOCKER_USER=$(echo "${{ secrets.DOCKER_USERNAME }}" | tr '[:upper:]' '[:lower:]')
+            docker pull $DOCKER_USER/fuelspot-app:latest
             
             # 앱 실행 (DB, Redis 연결 설정 포함)
             docker run -d \
               --name fuelspot-app \
               --network fuelspot-net \
               -p 8080:8080 \
+              --restart unless-stopped \
               -e TZ=Asia/Seoul \
               -e SPRING_DATASOURCE_URL="jdbc:mysql://fuelspot-db:3306/fuelspot_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" \
               -e SPRING_DATASOURCE_USERNAME=root \
@@ -109,8 +114,9 @@ jobs:
               -e KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }} \
               -e REDIS_HOST=fuelspot-redis \
               -e REDIS_PORT=6379 \
-              ${{ secrets.DOCKER_USERNAME }}/fuelspot-app:latest
+              $DOCKER_USER/fuelspot-app:latest         
             
+            docker image prune -f
 
       # 5. 작업이 끝나면 IP 제거 - 실패해도 무조건 실행
       - name: Remove Github Action IP from Security group
