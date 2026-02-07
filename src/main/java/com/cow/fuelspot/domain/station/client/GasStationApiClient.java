@@ -20,9 +20,8 @@ import java.net.URI;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class GasStationApiClient {
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final GasStationCacheManager cacheManager;
 
@@ -33,6 +32,12 @@ public class GasStationApiClient {
 
     @Value("${opinet.api-key}")
     private String apiKey;
+
+    public GasStationApiClient(ObjectMapper objectMapper, GasStationCacheManager cacheManager) {
+        this.restTemplate = new RestTemplate();
+        this.objectMapper = objectMapper;
+        this.cacheManager = cacheManager;
+    }
 
     // 근처 주유소 조회
     public List<OpinetNearbyDto> getNearbyGasStations(NearbyRequest request, FuelType type) {
@@ -55,7 +60,12 @@ public class GasStationApiClient {
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         List<OpinetNearbyDto> result = response.getOilList();
 
-        // 캐시 저장
+        // 데이터 검증
+        if (result == null || result.isEmpty()) {
+            throw new CustomException(ErrorCode.STATION_NO_CONTENT);
+        }
+
+        // 유효한 데이터만 캐시 저장
         cacheManager.putNearbyCache(cacheKey, result);
 
         return result;
@@ -82,7 +92,12 @@ public class GasStationApiClient {
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         List<OpinetNearbyDto> result = response.getOilList();
 
-        // 캐시 저장
+        // 데이터 검증
+        if (result == null || result.isEmpty()) {
+            throw new CustomException(ErrorCode.STATION_NO_CONTENT);
+        }
+
+        // 유효한 데이터만 캐시 저장
         cacheManager.putNearbyCache(cacheKey, result);
 
         return result;
@@ -133,11 +148,15 @@ public class GasStationApiClient {
                 .queryParam("code", apiKey)
                 .build()
                 .toUri();
-        System.out.println("url"+url);
         OpinetResponse<OpinetAverageDto> response = fetchAndParse(url, OpinetAverageDto.class);
         List<OpinetAverageDto> result = response.getOilList();
 
-        // 캐시 저장
+        // 데이터 검증
+        if (result == null || result.isEmpty()) {
+            throw new CustomException(ErrorCode.STATION_NO_CONTENT);
+        }
+
+        // 유효한 데이터만 캐시 저장
         cacheManager.putAverageCache(result);
 
         return result;
@@ -161,7 +180,12 @@ public class GasStationApiClient {
         OpinetResponse<OpinetSidoAverageDto> response = fetchAndParse(url, OpinetSidoAverageDto.class);
         List<OpinetSidoAverageDto> result = response.getOilList();
 
-        // 캐시 저장
+        // 데이터 검증
+        if (result == null || result.isEmpty()) {
+            throw new CustomException(ErrorCode.STATION_NO_CONTENT);
+        }
+
+        // 유효한 데이터만 캐시 저장
         cacheManager.putSidoAverageCache(sido.getCode(), result);
 
         return result;
