@@ -1,5 +1,6 @@
 package com.cow.fuelspot.domain.station.component;
 
+import com.cow.fuelspot.domain.favorite.service.FavoriteService;
 import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
 import com.cow.fuelspot.domain.map.service.KakaoMapService;
 import com.cow.fuelspot.global.common.enums.FuelType;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OpinetMapper {
     private final KakaoMapService kakaoMapService;
+    private final FavoriteService  favoriteService;
 
     // 상세 조회용 변환
     public DetailResponse toDetailResponse(OpinetDetailDto dto) {
@@ -29,7 +31,6 @@ public class OpinetMapper {
         Double lon = Double.valueOf(response.getDocuments().get(0).getX());
         Double lat = Double.valueOf(response.getDocuments().get(0).getY());
 
-
         return DetailResponse.builder()
                 .id(dto.getId())
                 .name(dto.getName())
@@ -38,8 +39,8 @@ public class OpinetMapper {
                 .tel(dto.getTel())
                 .lat(lat)
                 .lon(lon)
-                .isCarWash("Y".equals(dto.getCarWashYn()))
-                .isStore("Y".equals(dto.getCvsYn()))
+                .carWash("Y".equals(dto.getCarWashYn()))
+                .store("Y".equals(dto.getCvsYn()))
                 .prices(extractPricesAsMap(dto.getOilPrices()))
                 .tradeDate(timeInfo.date())
                 .tradeTime(timeInfo.time())
@@ -56,6 +57,8 @@ public class OpinetMapper {
         );
         Double lon = Double.valueOf(response.getDocuments().get(0).getX());
         Double lat = Double.valueOf(response.getDocuments().get(0).getY());
+//        long favoriteCount = favoriteService.getFavoriteCount(detail.getId());
+//        System.out.println(favoriteCount);
         return NearbyResponse.builder()
                 .id(nearby.getId())
                 .name(nearby.getName())
@@ -66,9 +69,10 @@ public class OpinetMapper {
                 .prices(extractPricesAsMap(detail.getOilPrices()))
                 .address(detail.getAddressNew())
                 .tel(detail.getTel())
-                .isCarWash("Y".equals(detail.getCarWashYn()))
+                .carWash("Y".equals(detail.getCarWashYn()))
                 .tradeDate(timeInfo.date)
                 .tradeTime(timeInfo.time())
+//                .favoriteCount(favoriteCount)
                 .build();
     }
 

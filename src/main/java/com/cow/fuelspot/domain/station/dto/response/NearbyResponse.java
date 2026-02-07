@@ -20,7 +20,8 @@ public class NearbyResponse {
     private Double lon;
     private String address;
     private String tel;
-    private boolean isCarWash;
+    private boolean carWash;
     private String tradeDate;
     private String tradeTime;
+    private long favoriteCount;
 }
