@@ -96,7 +96,7 @@ jobs:
             DOCKER_USER=$(echo "${{ secrets.DOCKER_USERNAME }}" | tr '[:upper:]' '[:lower:]')
             docker pull $DOCKER_USER/fuelspot-app:latest
             
-            # 앱 실행 (DB, Redis 연결 설정 포함)
+            # 앱 실행
             docker run -d \
               --name fuelspot-app \
               --network fuelspot-net \
@@ -114,7 +114,7 @@ jobs:
               -e KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }} \
               -e REDIS_HOST=fuelspot-redis \
               -e REDIS_PORT=6379 \
-              $DOCKER_USER/fuelspot-app:latest         
+              $DOCKER_USER/fuelspot-app:latest
             
             docker image prune -f
 
