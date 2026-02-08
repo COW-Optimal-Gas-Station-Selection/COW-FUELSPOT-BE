@@ -14,7 +14,13 @@ public enum Sido {
     GYEONGBUK("경북", "08"),
     GYEONGNAM("경남", "09"),
     BUSAN("부산", "10"),
-    JEJU("제주", "11");
+    JEJU("제주", "11"),
+    DAEGU("대구", "14"),
+    INCHEON("인천", "15"),
+    GWANGJU("광주", "16"),
+    DAEJEON("대전", "17"),
+    ULSAN("울산", "18"),
+    SEJONG("세종", "19");
 
     private final String name;
     private final String code;

@@ -18,12 +18,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor // 의존성 주입
-public class MemberController {
+public class MemberController implements MemberControllerDocs {
 
     private final MemberService memberService;
 
     // 회원가입 API
     // POST /api/members
+    @Override
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> signup(@RequestBody @Valid MemberSignupRequest request) {
         Long memberId = memberService.signup(request);
@@ -34,6 +35,7 @@ public class MemberController {
 
     // 내 정보 조회 API
     // GET /api/members/me
+    @Override
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<MemberInfoResponse>> getMyInfo(@AuthenticationPrincipal UserDetails userDetails) {
         // @AuthenticationPrincipal: SecurityContextHolder에 있는 현재 접속한 사람 정보 (UserDetails 객체) 주입
@@ -44,6 +46,7 @@ public class MemberController {
 
     // 내 정보 수정 API
     // PATCH /api/members/me
+    @Override
     @PatchMapping("/me")
     public ResponseEntity<ApiResponse<MemberInfoResponse>> updateMyInfo(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -56,6 +59,7 @@ public class MemberController {
 
     // 회원 탈퇴 API
     // DELETE /api/members/me
+    @Override
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> deleteMyAccount(@AuthenticationPrincipal UserDetails userDetails) {
         memberService.deleteMyAccount(userDetails.getUsername());
@@ -65,6 +69,7 @@ public class MemberController {
 
     // 비밀번호 변경 API
     // PATCH /api/members/password
+    @Override
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @AuthenticationPrincipal UserDetails userDetails,

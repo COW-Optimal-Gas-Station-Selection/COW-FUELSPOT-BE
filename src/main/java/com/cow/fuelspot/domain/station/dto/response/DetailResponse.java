@@ -21,8 +21,8 @@ public class DetailResponse {
     private String tel;
     private Double lat;
     private Double lon;
-    private boolean isCarWash;
-    private boolean isStore;
+    private boolean carWash;
+    private boolean store;
     private Map<FuelType, Integer> prices; // List에서 Map으로 변경
     private String tradeDate;
     private String tradeTime;
@@ -60,8 +60,8 @@ public class DetailResponse {
                 .tel(dto.getTel())
                 .lat(dto.getLat())
                 .lon(dto.getLon())
-                .isCarWash("Y".equals(dto.getCarWashYn()))
-                .isStore("Y".equals(dto.getCvsYn()))
+                .carWash("Y".equals(dto.getCarWashYn()))
+                .store("Y".equals(dto.getCvsYn()))
                 .prices(prices)
                 .tradeDate(tradeDate)
                 .tradeTime(tradeTime)
