@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,10 +76,12 @@ public class CarService {
     public List<CarResponse> getModels(String brandName) {
         return carList.stream()
                 .filter(car -> car.getBrand().equals(brandName))
-                .map(CachedCar::getModelName)
+                .map(car -> CarResponse.builder()
+                        .modelName(car.getModelName())
+                        .fuelEfficiency(car.getFuelEfficiency())
+                        .build())
                 .distinct()
-                .sorted()
-                .map(name -> CarResponse.builder().modelName(name).build())
+                .sorted(Comparator.comparing(CarResponse::getModelName))
                 .collect(Collectors.toList());
     }
 
