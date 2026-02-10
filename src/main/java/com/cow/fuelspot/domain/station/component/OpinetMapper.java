@@ -57,8 +57,8 @@ public class OpinetMapper {
         );
         Double lon = Double.valueOf(response.getDocuments().get(0).getX());
         Double lat = Double.valueOf(response.getDocuments().get(0).getY());
-//        long favoriteCount = favoriteService.getFavoriteCount(detail.getId());
-//        System.out.println(favoriteCount);
+        long favoriteCount = favoriteService.getFavoriteCount(detail.getId());
+        System.out.println(favoriteCount);
         return NearbyResponse.builder()
                 .id(nearby.getId())
                 .name(nearby.getName())
@@ -72,7 +72,7 @@ public class OpinetMapper {
                 .carWash("Y".equals(detail.getCarWashYn()))
                 .tradeDate(timeInfo.date)
                 .tradeTime(timeInfo.time())
-//                .favoriteCount(favoriteCount)
+                .favoriteCount(favoriteCount)
                 .build();
     }
 
