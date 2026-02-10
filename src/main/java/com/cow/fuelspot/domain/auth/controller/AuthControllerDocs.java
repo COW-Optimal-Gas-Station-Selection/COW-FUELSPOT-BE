@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "인증 관련 API", description = "로그인, 토큰 재발급, 이메일 인증, 비밀번호 찾기 등 인증 관련 기능")
+@Tag(name = "Auth", description = "인증 관련 API")
 public interface AuthControllerDocs {
 
     @Operation(summary = "로그인", description = "이메일과 비밀번호를 입력받아 엑세스 토큰 및 리프레시 토큰을 발급합니다.")
