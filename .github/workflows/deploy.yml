@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - chore/cicd-setting
+      - feat/car-api
 
 jobs:
   build-and-deploy:

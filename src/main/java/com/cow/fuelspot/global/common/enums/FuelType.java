@@ -39,5 +39,12 @@ public enum FuelType {
         }
     }
 
+    public static FuelType fromCsvName(String csvName) {
+        try {
+            return FuelType.valueOf(csvName.trim().toUpperCase());
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 }

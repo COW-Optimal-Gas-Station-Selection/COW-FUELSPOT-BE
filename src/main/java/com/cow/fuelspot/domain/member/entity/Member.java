@@ -35,6 +35,11 @@ public class Member {
 
     private Integer radius;
 
+    private String carName;
+    private Double carFuelEfficiency;
+
+
+
     // 생성자 대신 사용하는 Builder 패턴
     @Builder
     public Member(String email, String password, String nickname, FuelType fuelType, Integer radius) {
@@ -55,5 +60,11 @@ public class Member {
     // 비즈니스 로직 (비밀번호 변경)
     public void changePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void updateCar(String carName, FuelType fuelType, Double fuelEfficiency) {
+        this.carName = carName;
+        this.fuelType = fuelType;
+        this.carFuelEfficiency = fuelEfficiency;
     }
 }
