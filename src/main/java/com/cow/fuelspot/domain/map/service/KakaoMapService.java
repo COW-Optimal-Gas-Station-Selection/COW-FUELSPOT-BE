@@ -27,7 +27,6 @@ import java.net.URI;
 public class KakaoMapService {
 
     private final RestTemplate restTemplate;
-    private final SearchLogService searchLogService;
 
     @Value("${kakao.rest-api-key}")
     private String kakaoRestApiKey;
@@ -50,16 +49,7 @@ public class KakaoMapService {
     }
 
     // 장소 검색
-    public KakaoSearchResponse searchPlaces(String email, String keyword) {
-
-        if (email != null && !email.isEmpty()) {
-            try{
-                searchLogService.saveSearchKeyword(email, keyword);
-            } catch (Exception e){
-                log.warn("최근 검색어 저장 실패: {}", e.getMessage());
-            }
-        }
-
+    public KakaoSearchResponse searchPlaces(String keyword) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_SEARCH_URL)
                 .queryParam("query", keyword)
                 .queryParam("size", 10)
