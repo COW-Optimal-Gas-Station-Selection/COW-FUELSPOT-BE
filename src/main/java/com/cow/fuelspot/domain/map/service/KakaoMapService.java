@@ -4,6 +4,7 @@ import com.cow.fuelspot.domain.map.dto.KakaoAddressResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoDirectionsResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoSearchResponse;
 import com.cow.fuelspot.domain.map.dto.KakaoTranscoordResponse;
+import com.cow.fuelspot.domain.search.service.SearchLogService;
 import com.cow.fuelspot.global.common.code.ErrorCode;
 import com.cow.fuelspot.global.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.net.URI;
 public class KakaoMapService {
 
     private final RestTemplate restTemplate;
+    private final SearchLogService searchLogService;
 
     @Value("${kakao.rest-api-key}")
     private String kakaoRestApiKey;
@@ -37,7 +39,6 @@ public class KakaoMapService {
 
     // 길찾기
     public KakaoDirectionsResponse findRoute(String origin, String destination) {
-
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_DIRECTIONS_URL)
                 .queryParam("origin", origin)
                 .queryParam("destination", destination)
@@ -49,7 +50,16 @@ public class KakaoMapService {
     }
 
     // 장소 검색
-    public KakaoSearchResponse searchPlaces(String keyword) {
+    public KakaoSearchResponse searchPlaces(String email, String keyword) {
+
+        if (email != null && !email.isEmpty()) {
+            try{
+                searchLogService.saveSearchKeyword(email, keyword);
+            } catch (Exception e){
+                log.warn("최근 검색어 저장 실패: {}", e.getMessage());
+            }
+        }
+
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_SEARCH_URL)
                 .queryParam("query", keyword)
                 .queryParam("size", 10)
@@ -85,7 +95,8 @@ public class KakaoMapService {
         // 못 찾으면 null 반환
         return null;
     }
-//카카오->오피넷
+
+    // 좌표계 변환 (WGS84 -> KTM)
     public KakaoTranscoordResponse convertWGS84ToKTM(String x, String y) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
                 .queryParam("x", x)
@@ -96,7 +107,8 @@ public class KakaoMapService {
 
         return callKakaoApi(uri, KakaoTranscoordResponse.class);
     }
-    //
+
+    // 좌표계 변환 (KTM -> WGS84)
     public KakaoTranscoordResponse convertKTMToWGS84(String x, String y) {
         URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_TRANSCOORD_URL)
                 .queryParam("x", x)

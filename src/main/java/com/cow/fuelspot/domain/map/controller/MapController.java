@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/map")
@@ -31,8 +32,17 @@ public class MapController implements MapControllerDocs{
 
     @Override
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<KakaoSearchResponse>> searchPlace(@RequestParam String keyword) {
-        KakaoSearchResponse response = kakaoMapService.searchPlaces(keyword);
+    public ResponseEntity<ApiResponse<KakaoSearchResponse>> searchPlace(
+            @RequestParam String keyword,
+            Authentication authentication
+    ) {
+        String email = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            email = authentication.getName();
+        }
+
+        KakaoSearchResponse response = kakaoMapService.searchPlaces(email, keyword);
+
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 

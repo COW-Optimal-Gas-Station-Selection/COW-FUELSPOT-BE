@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "회원 관련 API", description = "회원가입, 내 정보 조회/수정/탈퇴, 비밀번호 변경 등 회원 관리 기능")
+@Tag(name = "Member", description = "회원 관련 API")
 public interface MemberControllerDocs {
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임, 선호 유종 등을 입력받아 신규 회원을 등록합니다.")
