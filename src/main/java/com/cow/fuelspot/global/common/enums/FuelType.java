@@ -40,14 +40,11 @@ public enum FuelType {
     }
 
     public static FuelType fromCsvName(String csvName) {
-        if (csvName == null) return null;
-        String name = csvName.trim();
-
-        if (name.equals("가솔린")) return GASOLINE;
-        if (name.equals("디젤")) return DIESEL;
-        if (name.equals("LPG")) return LPG;
-
-        return null;
+        try {
+            return FuelType.valueOf(csvName.trim().toUpperCase());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

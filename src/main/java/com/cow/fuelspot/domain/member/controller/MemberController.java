@@ -1,12 +1,10 @@
 package com.cow.fuelspot.domain.member.controller;
 
+import com.cow.fuelspot.domain.member.dto.*;
 import com.cow.fuelspot.domain.member.service.MemberService;
-import com.cow.fuelspot.domain.member.dto.MemberSignupRequest;
-import com.cow.fuelspot.domain.member.dto.PasswordChangeRequest;
-import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
-import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
 import com.cow.fuelspot.global.common.dto.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -78,5 +76,29 @@ public class MemberController implements MemberControllerDocs {
         memberService.changePassword(userDetails.getUsername(), request);
 
         return ResponseEntity.ok(ApiResponse.onSuccess());
+    }
+
+    @Operation(summary = "내 차 정보 조회", description = "현재 등록된 내 차 정보(모델명, 연비 등)를 조회합니다.")
+    @GetMapping("/car")
+    public ResponseEntity<ApiResponse<MemberCarResponse>> getMyCar(
+            @AuthenticationPrincipal UserDetails userDetails) { // Authentication -> UserDetails로 변경
+
+        String email = userDetails.getUsername(); // 이메일 가져오는 방식 통일
+        com.cow.fuelspot.domain.member.dto.MemberCarResponse response = memberService.getMyCar(email);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(response));
+    }
+
+    // [2] 내 차 등록 및 수정
+    @Operation(summary = "내 차 등록/수정하기", description = "브랜드, 모델명, 유종을 입력받아 내 차 정보를 저장합니다.")
+    @PostMapping("/car")
+    public ResponseEntity<ApiResponse<String>> registerCar(
+            @RequestBody com.cow.fuelspot.domain.member.dto.CarRegisterRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) { // Authentication -> UserDetails로 변경
+
+        String email = userDetails.getUsername();
+        memberService.registerCar(email, request);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("내 차 등록이 완료되었습니다."));
     }
 }

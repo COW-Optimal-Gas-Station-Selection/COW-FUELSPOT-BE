@@ -1,18 +1,24 @@
 package com.cow.fuelspot.domain.member.service;
 
-import com.cow.fuelspot.domain.member.dto.MemberSignupRequest;
+import com.cow.fuelspot.domain.car.dto.CachedCar;
+import com.cow.fuelspot.domain.car.service.CarService;
+import com.cow.fuelspot.domain.member.dto.*;
 import com.cow.fuelspot.domain.member.entity.Member;
 import com.cow.fuelspot.domain.member.repository.MemberRepository;
-import com.cow.fuelspot.domain.member.dto.MemberInfoResponse;
-import com.cow.fuelspot.domain.member.dto.MemberUpdateRequest;
-import com.cow.fuelspot.domain.member.dto.PasswordChangeRequest;
 import com.cow.fuelspot.global.common.code.ErrorCode;
+import com.cow.fuelspot.global.common.dto.ApiResponse;
+import com.cow.fuelspot.global.common.enums.FuelType;
 import com.cow.fuelspot.global.common.exception.CustomException;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 
 // 회원 서비스 계층
@@ -23,6 +29,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CarService carService;
 
     // 회원가입
     @Transactional
@@ -84,6 +91,28 @@ public class MemberService {
         String encodeNewPassword = passwordEncoder.encode(request.getNewPassword());
         member.changePassword(encodeNewPassword);
     }
+
+    public MemberCarResponse getMyCar(String email) {
+        Member member = findMemberByEmail(email);
+        if (member.getCarName() == null) {
+            return MemberCarResponse.empty();
+        }
+        return MemberCarResponse.builder()
+                .carName(member.getCarName())
+                .fuelType(member.getFuelType())
+                .fuelEfficiency(member.getCarFuelEfficiency())
+                .build();
+    }
+
+    // 내 차 등록
+    @Transactional
+    public void registerCar(String email, CarRegisterRequest request) {
+        Member member = findMemberByEmail(email);
+        CachedCar car = carService.findCar(request.getBrand(), request.getModelName(), request.getFuelType());
+        member.updateCar(car.getModelName(), car.getFuelType(), car.getFuelEfficiency());
+    }
+
+
 
     // 이메일로 회원 찾기 (공통 메서드)
     private Member findMemberByEmail(String email) {
