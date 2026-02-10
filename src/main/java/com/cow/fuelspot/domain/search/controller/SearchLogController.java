@@ -39,7 +39,7 @@ public class SearchLogController {
         return ResponseEntity.ok(ApiResponse.onSuccess());
     }
 
-    @Operation(summary = "최근 검색어 저장", description = "로그인한 사용자의 최근 검색어 5개를 가져옵니다.")
+    @Operation(summary = "최근 검색어 조회", description = "로그인한 사용자의 최근 검색어 5개를 가져옵니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<Set<String>>> getRecentKeywords(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails
