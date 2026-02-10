@@ -46,32 +46,62 @@ public class OpinetService {
             request.setLat(Double.valueOf(ktmResponse.getDocuments().get(0).getX()));
             request.setLon(Double.valueOf(ktmResponse.getDocuments().get(0).getY()));
         }
+
         FuelType fuelType = null;
-        if(request.getFuelType()==null){
-            //유저 정보(선호유종) 조회
-            if(authentication!=null) {
+        Double efficiency = null;
+
+        if (request.getFuelType() == null) {
+            //유저 정보(선호유종, 연비) 조회
+            if (authentication != null) {
                 String userId = authentication.getName();
                 fuelType = memberRepository.findFuelTypeByMemberId(userId);
+                efficiency = memberRepository.findCarFuelEfficiency(userId);
             }
             //기본값 설정(가솔린)
-            if (fuelType==null){
-                fuelType=FuelType.GASOLINE;
+            if (fuelType == null) {
+                fuelType = FuelType.GASOLINE;
             }
-        }else{
+        } else {
             fuelType = request.getFuelType();
         }
 
-        List<OpinetNearbyDto> nearbyDtos = gasStationApiClient.getStation(request,fuelType);
-        if (nearbyDtos == null) return List.of();
+        List<OpinetNearbyDto> nearbyDtos = new ArrayList<>();
+        List<FuelType> searchFuelTypes = List.of(
+                FuelType.GASOLINE,
+                FuelType.PREMIUM_GASOLINE,
+                FuelType.LPG
+        );
 
+        for (FuelType type : searchFuelTypes) {
+            List<OpinetNearbyDto> nearbyDto = gasStationApiClient.getStation(request, type);
+            if (nearbyDto != null && !nearbyDto.isEmpty()) {
+                nearbyDtos.addAll(nearbyDto);
+            }
+        }
+
+        if (nearbyDtos.isEmpty()) return List.of();
+
+        //stream을 위한 fianl 처리
         FuelType finalFuelType = fuelType;
+        Double finalEfficiency = efficiency;
 
         return nearbyDtos.stream()
                 .parallel()
-                .map(nearby -> new StationPair(nearby, gasStationApiClient.getDetailGasStation(nearby.getId())))
+                .map(nearby -> new StationPair(
+                        nearby,
+                        gasStationApiClient.getDetailGasStation(nearby.getId())
+                ))
                 .filter(pair -> stationFilter.isMatch(pair.nearby(), pair.detail(), request))
                 .map(pair -> opinetMapper.toNearbyResponse(pair.nearby(), pair.detail()))
-                .sorted(Comparator.comparingDouble(n -> fuelCalculator.calculateFuelConsumption(n, finalFuelType)))
+                .sorted(
+                        Comparator.comparing(
+                                n -> fuelCalculator.calculateFuelConsumption(
+                                        n,
+                                        finalFuelType,
+                                        finalEfficiency
+                                )
+                        )
+                )
                 .collect(Collectors.toList());
     }
 

@@ -20,4 +20,15 @@ public class UserRepository {
             return null;
         }
     }
+
+    public Double findCarFuelEfficiency(String memberId) {
+        String sql = "SELECT car_fuel_efficiency FROM member WHERE email = ?";
+        try {
+            Double fuelEfficiency = jdbcTemplate.queryForObject(sql, Double.class, memberId);
+            return fuelEfficiency != null ? fuelEfficiency : 0.0;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }
