@@ -33,16 +33,9 @@ public class MapController implements MapControllerDocs{
     @Override
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<KakaoSearchResponse>> searchPlace(
-            @RequestParam String keyword,
-            Authentication authentication
+            @RequestParam String keyword
     ) {
-        String email = null;
-        if (authentication != null && authentication.isAuthenticated()) {
-            email = authentication.getName();
-        }
-
-        KakaoSearchResponse response = kakaoMapService.searchPlaces(email, keyword);
-
+        KakaoSearchResponse response = kakaoMapService.searchPlaces(keyword);
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
