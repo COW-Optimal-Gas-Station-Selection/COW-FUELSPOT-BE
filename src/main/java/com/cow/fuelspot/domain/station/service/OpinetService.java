@@ -64,18 +64,24 @@ public class OpinetService {
         } else {
             fuelType = request.getFuelType();
         }
-
-        List<OpinetNearbyDto> nearbyDtos = new ArrayList<>();
         List<FuelType> searchFuelTypes = List.of(
                 FuelType.GASOLINE,
-                FuelType.PREMIUM_GASOLINE,
                 FuelType.LPG
         );
 
+        Set<String> existingIds = new HashSet<>();
+        List<OpinetNearbyDto> nearbyDtos = new ArrayList<>();
+
         for (FuelType type : searchFuelTypes) {
-            List<OpinetNearbyDto> nearbyDto = gasStationApiClient.getStation(request, type);
-            if (nearbyDto != null && !nearbyDto.isEmpty()) {
-                nearbyDtos.addAll(nearbyDto);
+            List<OpinetNearbyDto> nearbyDtoList = gasStationApiClient.getStation(request, type);
+
+            if (nearbyDtoList != null) {
+                for (OpinetNearbyDto dto : nearbyDtoList) {
+                    if (!existingIds.contains(dto.getId())) {
+                        nearbyDtos.add(dto);
+                        existingIds.add(dto.getId());
+                    }
+                }
             }
         }
 
@@ -95,7 +101,7 @@ public class OpinetService {
                 .map(pair -> opinetMapper.toNearbyResponse(pair.nearby(), pair.detail()))
                 .sorted(
                         Comparator.comparing(
-                                n -> fuelCalculator.calculateFuelConsumption(
+                                n -> fuelCalculator.calculateFuelConsum(
                                         n,
                                         finalFuelType,
                                         finalEfficiency
