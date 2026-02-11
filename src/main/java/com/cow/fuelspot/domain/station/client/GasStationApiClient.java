@@ -39,38 +39,6 @@ public class GasStationApiClient {
         this.cacheManager = cacheManager;
     }
 
-    // 근처 주유소 조회
-    public List<OpinetNearbyDto> getNearbyGasStations(NearbyRequest request, FuelType type) {
-        // 캐시 키 생성
-        String cacheKey = cacheManager.generateNearbyKey(
-                request.getLat(),
-                request.getLon(),
-                request.getRadius(),
-                type.getCode()
-        );
-
-        // 캐시 조회
-        List<OpinetNearbyDto> cachedData = cacheManager.getNearbyCache(cacheKey);
-        if (cachedData != null) {
-            return cachedData;
-        }
-
-        // API 호출
-        URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
-        OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
-        List<OpinetNearbyDto> result = response.getOilList();
-
-        // 데이터 검증
-        if (result == null || result.isEmpty()) {
-            throw new CustomException(ErrorCode.STATION_NO_CONTENT);
-        }
-
-        // 유효한 데이터만 캐시 저장
-        cacheManager.putNearbyCache(cacheKey, result);
-
-        return result;
-    }
-
     // 필터 조회
     public List<OpinetNearbyDto> getStation(NearbyRequest request, FuelType type) {
         // 캐시 키 생성
@@ -91,7 +59,6 @@ public class GasStationApiClient {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         List<OpinetNearbyDto> result = response.getOilList();
-
         // 데이터 검증
         if (result == null || result.isEmpty()) {
             throw new CustomException(ErrorCode.STATION_NO_CONTENT);
