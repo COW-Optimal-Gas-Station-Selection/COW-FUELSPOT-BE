@@ -28,7 +28,6 @@ public class FuelCalculator {
         if (price == null || price <= 0) {
             return Double.MAX_VALUE;
         }
-
         return (nearby.getDistance() / 1000.0 / finalEfficiency) * price;
     }
 }

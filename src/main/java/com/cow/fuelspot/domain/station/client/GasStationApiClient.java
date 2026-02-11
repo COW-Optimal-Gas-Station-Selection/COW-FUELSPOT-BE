@@ -59,7 +59,6 @@ public class GasStationApiClient {
         URI url = buildUri(RADIUS_API_URL, request.getLat(), request.getLon(), request.getRadius(), 1, type.getCode());
         OpinetResponse<OpinetNearbyDto> response = fetchAndParse(url, OpinetNearbyDto.class);
         List<OpinetNearbyDto> result = response.getOilList();
-        System.out.println(url);
         // 데이터 검증
         if (result == null || result.isEmpty()) {
             throw new CustomException(ErrorCode.STATION_NO_CONTENT);
