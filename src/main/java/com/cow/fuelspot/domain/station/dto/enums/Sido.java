@@ -3,7 +3,7 @@ package com.cow.fuelspot.domain.station.dto.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 
-public enum Sido {
+public enum ggit checjSido {
     SEOUL("서울", "01"),
     GYEONGGI("경기", "02"),
     GANGWON("강원", "03"),
